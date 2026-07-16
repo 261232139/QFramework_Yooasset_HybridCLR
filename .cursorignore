@@ -1,0 +1,1 @@
+*.meta,[Ll]ibrary/,[Tt]emp/,[Oo]bj/,[Bb]uild/,[Bb]uilds/,[Ll]ogs/,[Uu]ser[Ss]ettings/,MemoryCaptures/,Recordings/,Artifacts/,.vs/,.vscode/,*.csproj,*.sln,*.user,*.userprefs,*.pidb,*.booproj,*.unityproj,*.svd,*.pdb,*.mdb,*.opendb,*.VC.db,*.tmp,*.log,*.apk,*.aab,*.ipa,*.unitypackage# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
