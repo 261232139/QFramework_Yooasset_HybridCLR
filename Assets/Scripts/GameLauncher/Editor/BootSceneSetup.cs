@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.IO;
+using Launch;
 
 namespace GameLauncher.Editor
 {
@@ -64,7 +65,7 @@ namespace GameLauncher.Editor
             if (File.Exists(PREFAB_PATH))
             {
                 var existing = AssetDatabase.LoadAssetAtPath<GameObject>(PREFAB_PATH);
-                if (existing != null && existing.GetComponent<GameLauncher>() != null)
+                if (existing != null && existing.GetComponent<Launch.GameLauncher>() != null)
                 {
                     Debug.Log("[BootSceneSetup] 预制体已存在，使用现有预制体");
                     return existing;
@@ -72,7 +73,7 @@ namespace GameLauncher.Editor
             }
 
             // 创建临时 GameObject
-            var tempGO = new GameObject("GameLauncher", typeof(GameLauncher));
+            var tempGO = new GameObject("GameLauncher", typeof(Launch.GameLauncher));
 
             // 确保目录存在
             if (!Directory.Exists(PREFAB_DIR))

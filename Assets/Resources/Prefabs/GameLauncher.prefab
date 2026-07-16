@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8662587910267371275}
-  - component: {fileID: 6491156570078946630}
+  - component: {fileID: 4533492109631144897}
   m_Layer: 0
   m_Name: GameLauncher
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6491156570078946630
+--- !u!114 &4533492109631144897
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,12 +41,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 766003599097676516}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ce96e015599f0447aa328f2f66c1dfb, type: 3}
+  m_Script: {fileID: 11500000, guid: 78877ec5181d2724f8f281e7cb6ce01d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   packageName: DefaultPackage
-  packageVersion: 1.0.0
-  hotUpdateDllName: HotUpdate
   hotUpdateDllLocation: Assets/Res/HotUpdate/HotUpdate.dll
   hotUpdateEntryMethod: HotUpdate.GameEntry, HotUpdate
-  progress: 0

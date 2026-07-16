@@ -56,23 +56,24 @@ namespace QFramework
                 YooAssets.Initialize();
             }
 
-            // 2. 创建资源包
-            var package = YooAssets.CreatePackage(packageName);
+            // 2. 创建或复用资源包（防止重复创建同名包）
+            if (!YooAssets.TryGetPackage(packageName, out var package))
+                package = YooAssets.CreatePackage(packageName);
 
             // 3. 初始化资源包（异步，不阻塞）
             if (packageOptions == null)
             {
-                packageOptions = CreateDefaultInitOptions();
+                packageOptions = CreateDefaultInitOptions(packageName);
             }
 
             var initOp = package.InitializePackageAsync(packageOptions);
-            sDefaultPackage = package;
 
-            // 注册完成回调，不阻塞等待
+            // 注册完成回调，成功后才赋值
             initOp.Completed += (op) =>
             {
                 if (op.Status == EOperationStatus.Succeeded)
                 {
+                    sDefaultPackage = package;
                     Debug.Log($"[YooAssetBridge] YooAsset initialized. Package: {packageName}");
                 }
                 else
@@ -99,13 +100,14 @@ namespace QFramework
                 YooAssets.Initialize();
             }
 
-            // 2. 创建资源包
-            var package = YooAssets.CreatePackage(packageName);
+            // 2. 创建或复用资源包（防止重复创建同名包）
+            if (!YooAssets.TryGetPackage(packageName, out var package))
+                package = YooAssets.CreatePackage(packageName);
 
             // 3. 初始化资源包
             if (packageOptions == null)
             {
-                packageOptions = CreateDefaultInitOptions();
+                packageOptions = CreateDefaultInitOptions(packageName);
             }
 
             var initOp = package.InitializePackageAsync(packageOptions);
@@ -124,16 +126,33 @@ namespace QFramework
         /// <summary>
         /// 创建默认的初始化参数（编辑器模拟模式 / 运行时内置文件系统）
         /// </summary>
-        public static InitializePackageOptions CreateDefaultInitOptions()
+        public static InitializePackageOptions CreateDefaultInitOptions(string packageName = "DefaultPackage")
         {
 #if UNITY_EDITOR
-            // 编辑器下使用 EditorSimulateMode
-            return new EditorSimulateModeOptions
+            try
             {
-                EditorFileSystemParameters = FileSystemParameters.CreateDefaultEditorFileSystemParameters(null)
+                var buildResult = EditorSimulateBuildInvoker.Build(packageName, (int)EBundleType.VirtualAssetBundle);
+                if (buildResult != null && !string.IsNullOrEmpty(buildResult.PackageRootDirectory))
+                {
+                    return new EditorSimulateModeOptions
+                    {
+                        EditorFileSystemParameters = FileSystemParameters.CreateDefaultEditorFileSystemParameters(buildResult.PackageRootDirectory)
+                    };
+                }
+                Debug.LogWarning($"[YooAssetBridge] EditorSimulateBuild returned empty PackageRootDirectory for '{packageName}'. " +
+                                 "Make sure the package has at least one Collector in the YooAsset Collector window. " +
+                                 "Falling back to OfflinePlayMode.");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[YooAssetBridge] EditorSimulateBuild failed for '{packageName}': {e.Message}. " +
+                                 "Falling back to OfflinePlayMode.");
+            }
+            return new OfflinePlayModeOptions
+            {
+                BuiltinFileSystemParameters = FileSystemParameters.CreateDefaultBuiltinFileSystemParameters()
             };
 #else
-            // 运行时使用 OfflinePlayMode（从 StreamingAssets 读取）
             return new OfflinePlayModeOptions
             {
                 BuiltinFileSystemParameters = FileSystemParameters.CreateDefaultBuiltinFileSystemParameters()

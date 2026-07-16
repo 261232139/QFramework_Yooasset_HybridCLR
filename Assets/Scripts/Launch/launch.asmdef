@@ -1,0 +1,17 @@
+{
+    "name": "Launch",
+    "references": [
+        "QFramework",
+        "QFramework.CoreKit",
+        "YooAsset",
+        "ResKit"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}

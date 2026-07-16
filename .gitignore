@@ -1,0 +1,16 @@
+Library/
+Temp/
+obj/
+Obj/
+Log/
+Logs/
+*.csproj
+*.sln
+.vs/
+.vscode/settings.json
+Build/
+StrippedAOTDllsTempProj/
+HybridCLRData/LocalIl2CppData-OSXEditor/
+HybridCLRData/HotUpdateDlls/
+Bundles/
+Build/

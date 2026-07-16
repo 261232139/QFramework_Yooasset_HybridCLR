@@ -1,1 +1,106 @@
-*.meta,[Ll]ibrary/,[Tt]emp/,[Oo]bj/,[Bb]uild/,[Bb]uilds/,[Ll]ogs/,[Uu]ser[Ss]ettings/,MemoryCaptures/,Recordings/,Artifacts/,.vs/,.vscode/,*.csproj,*.sln,*.user,*.userprefs,*.pidb,*.booproj,*.unityproj,*.svd,*.pdb,*.mdb,*.opendb,*.VC.db,*.tmp,*.log,*.apk,*.aab,*.ipa,*.unitypackage# Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+# ============================================
+# Unity 项目 .cursorignore 配置
+# 让 Cursor AI 忽略自动生成的、临时的和二进制文件
+# 提升索引速度，避免将无关内容发送给 AI
+# ============================================
+
+# ---------- Unity 核心生成目录 ----------
+# 这些是 Unity 自动生成的文件夹，包含大量缓存和元数据
+/Library/
+/Temp/
+/obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+
+# ---------- 版本控制目录 ----------
+/.git/
+/.svn/
+/.hg/
+
+# ---------- IDE 和编辑器文件 ----------
+# Visual Studio / VS Code 生成的项目文件
+/*.csproj
+/*.unityproj
+/*.sln
+/*.suo
+/*.user
+/*.userprefs
+/*.pidb
+/*.booproj
+/*.svd
+/*.pdb
+/*.mdb
+/*.opendb
+/*.VC.db
+
+# ---------- Unity 特定元数据文件 ----------
+# 所有 .meta 文件都是自动生成的，不应被 AI 索引
+*.meta
+
+# ---------- 构建和发布产物 ----------
+# 各种平台的构建输出
+*.apk
+*.aab
+*.ipa
+*.app
+*.exe
+*.dll
+*.so
+*.bundle
+*.framework
+*.unitypackage
+
+# ---------- 临时文件和缓存 ----------
+*.tmp
+*.bak
+*.cache
+*.pid
+*.log
+*.csv
+*.json
+# 注意：如果项目中包含重要的 .json 配置文件（如对话数据），
+# 可以注释掉上面这行，或使用更精确的规则
+
+# ---------- 大型二进制资产 ----------
+# 这些文件对 AI 没有帮助，且会拖慢索引
+*.psd
+*.tga
+*.tif
+*.tiff
+*.wav
+*.mp3
+*.ogg
+*.aiff
+*.mp4
+*.mov
+*.avi
+*.wmv
+*.fbx
+*.blend
+*.max
+*.mb
+*.ma
+*.3ds
+*.dae
+*.skp
+*.pdf
+*.doc
+*.docx
+
+# ---------- 资源商店/插件特定目录 ----------
+# 如果使用特定资源商店插件，可以按需添加
+# Assets/Plugins/
+# Assets/Editor Default Resources/
+# ProjectSettings/  # 注意：ProjectSettings 通常需要版本控制，不建议忽略
+
+# ---------- 包管理 ----------
+# Unity Package Manager 缓存
+/Packages/packages-lock.json
+# 注意：packages-lock.json 有时需要提交，请根据团队策略决定
+
+# ---------- 操作系统文件 ----------
+.DS_Store
+Thumbs.db
+desktop.ini
