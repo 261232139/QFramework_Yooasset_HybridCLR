@@ -4,7 +4,8 @@
         "QFramework",
         "QFramework.CoreKit",
         "YooAsset",
-        "ResKit"
+        "ResKit",
+        "Unity.TextMeshPro"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

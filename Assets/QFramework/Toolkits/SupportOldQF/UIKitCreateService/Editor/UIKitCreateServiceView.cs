@@ -236,8 +236,10 @@ namespace QFramework
 
                     EditorSceneManager.SaveScene(scene);
 
-                    // 标记 AssetBundle
+                    // YooAsset 管理资源，不再需要手动标记 AB
+#pragma warning disable CS0618
                     ResKitAssetsMenu.MarkAB(panelPrefabPath);
+#pragma warning restore CS0618
                     
                     var tester = new GameObject("Test{0}".FillFormat(panelName));
                     var uiPanelTester = tester.AddComponent<ResKitUIPanelTester>();

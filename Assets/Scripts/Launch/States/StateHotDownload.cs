@@ -33,7 +33,7 @@ namespace Launch
             if (downloader.TotalDownloadCount == 0)
             {
                 Debug.Log("[HotDownload] 无需下载");
-                ctx.Progress = 0.4f;
+                ctx.Progress = 0.6f;
                 StartHotUpdateFSM();
                 yield break;
             }

@@ -19,6 +19,12 @@ namespace HotUpdate
             ctx.Progress = 1f;
             Debug.Log("[EnterLobby] 启动完成，进入大厅");
 
+            if (Launch.LoadingUI.Instance != null)
+            {
+                Launch.LoadingUI.Instance.Hide();
+                Debug.Log("[EnterLobby] Loading UI 已隐藏");
+            }
+
             // 优先尝试调用热更侧入口（HybridCLR 场景）
             try
             {

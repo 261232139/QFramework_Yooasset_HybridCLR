@@ -29,7 +29,6 @@ namespace Launch
             var ctx     = LaunchContext.Instance;
             var package = ctx.DefaultPackage;
 
-            // 1. 请求远端版本号（超时 60 s，允许离线）
             var versionOp = package.RequestPackageVersionAsync(
                 new RequestPackageVersionOptions(appendTimeTicks: true, timeout: 60));
             yield return versionOp;
@@ -45,7 +44,6 @@ namespace Launch
             ctx.RemoteVersion = versionOp.PackageVersion;
             Debug.Log($"[HotCheckVersion] 远端版本: {ctx.RemoteVersion}");
 
-            // 2. 加载远端清单
             var manifestOp = package.LoadPackageManifestAsync(
                 new LoadPackageManifestOptions(ctx.RemoteVersion, timeout: 60));
             yield return manifestOp;

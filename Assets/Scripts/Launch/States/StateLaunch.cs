@@ -31,7 +31,6 @@ namespace Launch
             if (!YooAssets.IsInitialized)
                 YooAssets.Initialize();
 
-            // 复用已有包（editor CheckAutoInit 可能抢先创建）
             if (!YooAssets.TryGetPackage(ctx.PackageName, out var package))
                 package = YooAssets.CreatePackage(ctx.PackageName);
 

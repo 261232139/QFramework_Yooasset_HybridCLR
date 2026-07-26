@@ -7,6 +7,7 @@
  *   1. 从 Inspector 读取配置并写入 LaunchContext
  *   2. 启动 LaunchFSM
  *   3. 驱动 LaunchFSM.Update()
+ *   4. 自动挂载 LoadingUI 到 LaunchUI
  *
  * 不包含任何业务逻辑，所有流程细节由各状态类处理。
  ****************************************************************************/
@@ -25,6 +26,9 @@ namespace Launch
         [SerializeField] private string hotUpdateDllLocation = "Assets/Res/HotUpdate/HotUpdate.dll";
         [SerializeField] private string hotUpdateEntryMethod = "HotUpdate.GameEntry, HotUpdate";
 
+        [Header("Loading UI")]
+        [SerializeField] private GameObject launchUI;
+
         public FSM<LaunchState> LaunchFSM { get; private set; }
 
         private void Awake()
@@ -39,7 +43,8 @@ namespace Launch
 
         private void Start()
         {
-            // 当 LaunchFSM 完成时，动态挂载 HotUpdateRunner（Type.GetType 避免编译期循环依赖）
+            InitLoadingUI();
+
             LaunchContext.Instance.OnLaunchComplete += () =>
             {
                 var runnerType = System.Type.GetType("HotUpdate.HotUpdateRunner, HotUpdate");
@@ -59,6 +64,36 @@ namespace Launch
                 Debug.Log($"[LaunchFSM] {prev} → {next}"));
 
             LaunchFSM.StartState(LaunchState.Launch);
+        }
+
+        private void InitLoadingUI()
+        {
+            if (launchUI == null)
+            {
+                // 在场景中查找 LaunchUI
+                var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+                foreach (var canvas in canvases)
+                {
+                    var t = canvas.transform.Find("LaunchUI");
+                    if (t != null)
+                    {
+                        launchUI = t.gameObject;
+                        break;
+                    }
+                }
+            }
+
+            if (launchUI == null)
+            {
+                Debug.LogWarning("[GameLauncher] 找不到 LaunchUI，跳过 Loading UI 初始化");
+                return;
+            }
+
+            if (launchUI.GetComponent<LoadingUI>() == null)
+            {
+                launchUI.AddComponent<LoadingUI>();
+                Debug.Log("[GameLauncher] 已自动挂载 LoadingUI 到 LaunchUI");
+            }
         }
 
         private void Update() => LaunchFSM?.Update();
