@@ -1,63 +1,73 @@
-/****************************************************************************
- * Copyright (c) 2024 Game Project UNDER MIT License
- *
- * 关卡配置加载器
- *
- * 职责: 从 JSON 文件加载关卡配置
- * 路径: Assets/Game/LevelConfig/level{id}.json
- ****************************************************************************/
-
+using System;
+using System.Collections;
 using UnityEngine;
-using System.IO;
+using YooAsset;
 
 namespace Game.Level.Data
 {
-    /// <summary>
-    /// 关卡配置加载器
-    /// 
-    /// 从 Assets/Game/LevelConfig/level{id}.json 加载并解析关卡配置。
-    /// </summary>
     public static class LevelConfigLoader
     {
-        private const string CONFIG_DIR = "Assets/Game/LevelConfig";
-        private const string CONFIG_FILE_PATTERN = "level{0}.json";
-
-        /// <summary>
-        /// 加载指定 ID 的关卡配置
-        /// 
-        /// 返回 null 表示加载失败（文件不存在或 JSON 格式错误）
-        /// </summary>
-        public static LevelConfig Load(int levelId)
+        public static IEnumerator LoadAsync(string levelId, Action<LevelConfig> completed)
         {
-            string fileName = string.Format(CONFIG_FILE_PATTERN, levelId);
-            string filePath = Path.Combine(CONFIG_DIR, fileName);
-
-            // 尝试从 Resources 加载（编辑器和运行时都支持）
-            string resourcePath = Path.Combine(CONFIG_DIR, Path.GetFileNameWithoutExtension(fileName));
-            TextAsset jsonAsset = Resources.Load<TextAsset>(resourcePath);
-
-            if (jsonAsset == null)
+            if (string.IsNullOrWhiteSpace(levelId))
             {
-                Debug.LogError($"[LevelConfigLoader] 找不到关卡配置: {filePath}");
-                return null;
+                Debug.LogError("[LevelConfigLoader] Level id cannot be empty.");
+                completed?.Invoke(null);
+                yield break;
             }
 
+            var package = QFramework.YooAssetBridge.DefaultPackage;
+            if (package == null)
+            {
+                completed?.Invoke(null);
+                yield break;
+            }
+
+            var handle = package.LoadAssetAsync<TextAsset>(levelId);
+            yield return handle;
+
+            LevelConfig config = null;
+            if (handle.Status != EOperationStatus.Succeeded || handle.AssetObject == null)
+            {
+                Debug.LogError($"[LevelConfigLoader] YooAsset load failed for '{levelId}': {handle.Error}");
+            }
+            else
+            {
+                config = Parse(levelId, ((TextAsset)handle.AssetObject).text);
+            }
+
+            handle.Dispose();
+            completed?.Invoke(config);
+        }
+
+        private static LevelConfig Parse(string levelId, string json)
+        {
             try
             {
-                LevelConfig config = JsonUtility.FromJson<LevelConfig>(jsonAsset.text);
-
-                if (config == null || !config.Validate())
+                var config = JsonUtility.FromJson<LevelConfig>(json);
+                if (config == null)
                 {
-                    Debug.LogError($"[LevelConfigLoader] 关卡配置无效: {levelId}");
+                    Debug.LogError($"[LevelConfigLoader] Invalid config '{levelId}': JSON deserialized to null.");
                     return null;
                 }
 
-                Debug.Log($"[LevelConfigLoader] 加载关卡配置成功: level{levelId}");
+                if (!config.Validate(out var error))
+                {
+                    Debug.LogError($"[LevelConfigLoader] Invalid config '{levelId}': {error}");
+                    return null;
+                }
+
+                if (config.levelId != levelId)
+                {
+                    Debug.LogError($"[LevelConfigLoader] Address '{levelId}' does not match id '{config.levelId}'.");
+                    return null;
+                }
+
                 return config;
             }
-            catch (System.Exception e)
+            catch (Exception exception)
             {
-                Debug.LogError($"[LevelConfigLoader] JSON 解析失败: {e.Message}");
+                Debug.LogError($"[LevelConfigLoader] Failed to parse '{levelId}': {exception.Message}");
                 return null;
             }
         }

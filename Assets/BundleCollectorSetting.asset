@@ -18,29 +18,54 @@ MonoBehaviour:
   Packages:
   - PackageName: DefaultPackage
     PackageDesc: 
-    EnableAddressable: 0
+    EnableAddressable: 1
     SupportExtensionless: 1
     LocationToLower: 0
     IncludeAssetGUID: 0
     AutoCollectShaders: 1
     IgnoreRuleName: NormalIgnoreRule
     Groups:
-    - GroupName: Common
-      GroupDesc: Common
+    - GroupName: Default Group
+      GroupDesc: 
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors: []
+    - GroupName: Lobby
+      GroupDesc: 
       AssetTags: 
       ActiveRuleName: EnableGroup
       Collectors:
-      - CollectPath: Assets/Scripts
-        CollectorGUID: 
-        CollectorType: MainAssetCollector
+      - CollectPath: Assets/Game/Features/Feature
+        CollectorGUID: 4996cf3ca6015f242bb6f1b3d5e38cb8
+        CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 
-      - CollectPath: Assets/Resources/Prefabs
-        CollectorGUID: 
-        CollectorType: MainAssetCollector
+        UserData: 
+    - GroupName: LevelConfig
+      GroupDesc: YooAsset level configuration files
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Config/Level
+        CollectorGUID: 0382b48025a15464bb92b18dbe5d641b
+        CollectorType: 0
         AddressRuleName: AddressByFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 
+        UserData: 
+    - GroupName: Level
+      GroupDesc: 
+      AssetTags: 
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Level
+        CollectorGUID: b2d2bc2875c26c54b8f77690d8d28fc4
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags: 
+        UserData: 

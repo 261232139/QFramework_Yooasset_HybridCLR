@@ -37,6 +37,7 @@ namespace QFramework
         public GraphicRaycaster GraphicRaycaster;
 
         public RectTransform Bg;
+        public RectTransform Level;
         public RectTransform Common;
         public RectTransform PopUI;
         public RectTransform CanvasPanel;

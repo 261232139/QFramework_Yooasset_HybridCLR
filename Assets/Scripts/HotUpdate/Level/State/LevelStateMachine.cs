@@ -3,7 +3,7 @@
  *
  * 关卡状态机
  *
- * 职责: 驱动关卡 FSM，管理关卡生命周期
+ * 管理关卡的整个生命周期
  ****************************************************************************/
 
 using UnityEngine;
@@ -15,49 +15,18 @@ namespace Game.Level.State
     /// <summary>
     /// 关卡状态机
     /// 
-    /// 管理整个关卡的生命周期：
-    /// Enter → Prepare → Ready → Playing ↔ Pause → Win/Lose → Exit
-    /// 
-    /// 使用方式：
-    ///   var fsm = new LevelStateMachine(levelId);
-    ///   fsm.StartLevel();
-    ///   // 在 Update 中驱动
-    ///   fsm.Update();
+    /// 负责管理关卡从加载到结束的整个流程
     /// </summary>
     public class LevelStateMachine : MonoBehaviour
     {
-        [SerializeField] private int mLevelId = 1;
-        public int LevelId => mLevelId;
-
-        /// <summary>关卡数据上下文</summary>
         public LevelContext Context { get; private set; }
-
-        /// <summary>状态机</summary>
         private FSM<LevelState> mFSM;
+        private bool mInitialized;
 
         private void Awake()
         {
             Context = new LevelContext();
-        }
-
-        private void Start()
-        {
-            // 初始化状态机
-            mFSM = new FSM<LevelState>();
-
-            mFSM.AddState(LevelState.Enter,   new StateEnter(mFSM, this));
-            mFSM.AddState(LevelState.Prepare, new StatePrepare(mFSM, this));
-            mFSM.AddState(LevelState.Ready,   new StateReady(mFSM, this));
-            mFSM.AddState(LevelState.Playing, new StatePlaying(mFSM, this));
-            mFSM.AddState(LevelState.Pause,   new StatePause(mFSM, this));
-            mFSM.AddState(LevelState.Win,     new StateWin(mFSM, this));
-            mFSM.AddState(LevelState.Lose,    new StateLose(mFSM, this));
-            mFSM.AddState(LevelState.Exit,    new StateExit(mFSM, this));
-
-            mFSM.OnStateChanged((prev, next) =>
-                Debug.Log($"[LevelFSM] State: {prev} → {next}"));
-
-            StartLevel();
+            InitializeStateMachine();
         }
 
         private void Update()
@@ -67,37 +36,154 @@ namespace Game.Level.State
 
         private void OnDestroy()
         {
+            LevelEventManager.Clear();
             mFSM?.Clear();
         }
 
-        /// <summary>启动关卡</summary>
-        public void StartLevel()
+        #region 公共方法
+
+        /// <summary>
+        /// 开始关卡（从大厅进入）
+        /// </summary>
+        /// <param name="config">关卡配置</param>
+        /// <param name="levelNumber">关卡编号</param>
+        /// <param name="coroutineHost">协程宿主（用于播放动画等异步操作）</param>
+        public void Begin(LevelConfig config, int levelNumber, MonoBehaviour coroutineHost = null)
         {
-            Debug.Log($"[LevelFSM] 启动关卡 {mLevelId}");
-            mFSM.StartState(LevelState.Enter);
+            if (config == null)
+            {
+                Debug.LogError("[LevelStateMachine] Cannot begin with a null config.");
+                return;
+            }
+
+            InitializeStateMachine();
+            
+            Context.Config = config;
+            Context.LevelNumber = levelNumber;
+            Context.CoroutineHost = coroutineHost ?? this;
+            Context.Pieces.Clear();
+
+            Debug.Log($"[LevelStateMachine] Starting level {levelNumber}: {config.levelId}");
+            mFSM.StartState(LevelState.LobbyToLevel);
         }
 
-        /// <summary>暂停游戏</summary>
+        /// <summary>
+        /// 暂停关卡
+        /// </summary>
         public void Pause()
         {
-            if (mFSM.CurrentStateId == LevelState.Playing)
-                mFSM.ChangeState(LevelState.Pause);
+            if (mFSM.CurrentStateId == LevelState.LevelRunning)
+            {
+                mFSM.ChangeState(LevelState.LevelPause);
+            }
         }
 
-        /// <summary>恢复游戏</summary>
+        /// <summary>
+        /// 恢复关卡
+        /// </summary>
         public void Resume()
         {
-            if (mFSM.CurrentStateId == LevelState.Pause)
-                mFSM.ChangeState(LevelState.Playing);
+            if (mFSM.CurrentStateId == LevelState.LevelPause)
+            {
+                mFSM.ChangeState(LevelState.LevelRunning);
+            }
         }
 
-        /// <summary>退出关卡</summary>
-        public void QuitLevel()
+        /// <summary>
+        /// 关卡胜利
+        /// </summary>
+        public void Win()
         {
-            mFSM.ChangeState(LevelState.Exit);
+            if (mFSM.CurrentStateId == LevelState.LevelRunning)
+            {
+                mFSM.ChangeState(LevelState.LevelSuccess);
+            }
         }
 
-        /// <summary>获取当前状态</summary>
-        public LevelState GetCurrentState() => mFSM.CurrentStateId;
+        /// <summary>
+        /// 关卡失败
+        /// </summary>
+        public void Fail()
+        {
+            if (mFSM.CurrentStateId == LevelState.LevelRunning)
+            {
+                mFSM.ChangeState(LevelState.LevelFail);
+            }
+        }
+
+        /// <summary>
+        /// 重试关卡
+        /// </summary>
+        public void Retry()
+        {
+            if (Context.Config != null)
+            {
+                var config = Context.Config;
+                var levelNumber = Context.LevelNumber;
+                var host = Context.CoroutineHost;
+                
+                Context.Clear();
+                Begin(config, levelNumber, host);
+            }
+        }
+
+        /// <summary>
+        /// 退出关卡（返回大厅）
+        /// </summary>
+        public void QuitToLobby()
+        {
+            mFSM.ChangeState(LevelState.LevelToLobby);
+        }
+
+        /// <summary>
+        /// 获取当前状态
+        /// </summary>
+        public LevelState GetCurrentState()
+        {
+            return mFSM.CurrentStateId;
+        }
+
+        /// <summary>
+        /// 检查是否在游戏中
+        /// </summary>
+        public bool IsPlaying()
+        {
+            return mFSM.CurrentStateId == LevelState.LevelRunning;
+        }
+
+        /// <summary>
+        /// 检查是否已暂停
+        /// </summary>
+        public bool IsPaused()
+        {
+            return mFSM.CurrentStateId == LevelState.LevelPause;
+        }
+
+        #endregion
+
+        #region 内部方法
+
+        private void InitializeStateMachine()
+        {
+            if (mInitialized)
+                return;
+
+            mFSM = new FSM<LevelState>();
+            
+            // 注册所有状态
+            mFSM.AddState(LevelState.LobbyToLevel, new StateLobbyToLevel(mFSM, this));
+            mFSM.AddState(LevelState.LoadLevel, new StateLoadLevel(mFSM, this));
+            mFSM.AddState(LevelState.LevelReady, new StateLevelReady(mFSM, this));
+            mFSM.AddState(LevelState.LevelRunning, new StateLevelRunning(mFSM, this));
+            mFSM.AddState(LevelState.LevelPause, new StateLevelPause(mFSM, this));
+            mFSM.AddState(LevelState.LevelSuccess, new StateLevelSuccess(mFSM, this));
+            mFSM.AddState(LevelState.LevelFail, new StateLevelFail(mFSM, this));
+            mFSM.AddState(LevelState.LevelToLobby, new StateLevelToLobby(mFSM, this));
+            
+            mInitialized = true;
+            Debug.Log("[LevelStateMachine] State machine initialized with 8 states");
+        }
+
+        #endregion
     }
 }

@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using UnityEngine;
+using YooAsset;
 
 namespace QFramework
 {
@@ -16,77 +17,82 @@ namespace QFramework
     {
         public class ResKitPanelLoader : IPanelLoader
         {
-            private ResLoader mResLoader;
+            private AssetHandle mHandle;
 
             public GameObject LoadPanelPrefab(PanelSearchKeys panelSearchKeys)
             {
-                if (mResLoader == null)
-                {
-                    mResLoader = ResLoader.Allocate();
-                }
-
-                if (panelSearchKeys.PanelType.IsNotNull() && panelSearchKeys.GameObjName.IsNullOrEmpty())
-                {
-                    return mResLoader.LoadSync<GameObject>(panelSearchKeys.PanelType.Name);
-                }
-
-                if (panelSearchKeys.AssetBundleName.IsNotNullAndEmpty())
-                {
-                    return mResLoader.LoadSync<GameObject>(panelSearchKeys.AssetBundleName,
-                        panelSearchKeys.GameObjName);
-                }
-
-                return mResLoader.LoadSync<GameObject>(panelSearchKeys.GameObjName);
+                EnsureInitialized();
+                var location = ResolveLocation(panelSearchKeys);
+                
+                var package = YooAssetBridge.DefaultPackage;
+                mHandle = package.LoadAssetSync<GameObject>(location);
+                
+                var prefab = mHandle?.AssetObject as GameObject;
+                ValidatePrefab(prefab, location, panelSearchKeys.AssetBundleName);
+                return prefab;
             }
 
             public void LoadPanelPrefabAsync(PanelSearchKeys panelSearchKeys, Action<GameObject> onLoad)
             {
-                if (mResLoader == null)
-                {
-                    mResLoader = ResLoader.Allocate();
-                }
+                EnsureInitialized();
+                var location = ResolveLocation(panelSearchKeys);
+                var package = YooAssetBridge.DefaultPackage;
 
-                if (panelSearchKeys.PanelType.IsNotNull() && panelSearchKeys.GameObjName.IsNullOrEmpty())
+                var handle = package.LoadAssetAsync<GameObject>(location);
+                handle.Completed += (op) =>
                 {
-                    mResLoader.Add2Load<GameObject>(panelSearchKeys.PanelType.Name, (success, res) =>
-                    {
-                        if (success)
-                        {
-                            onLoad(res.Asset as GameObject);
-                        }
-                    });
-                    mResLoader.LoadAsync();
-                    return;
-                }
-
-                if (panelSearchKeys.AssetBundleName.IsNotNullAndEmpty())
-                {
-                    mResLoader.Add2Load<GameObject>(panelSearchKeys.AssetBundleName, panelSearchKeys.GameObjName,
-                        (success, res) =>
-                        {
-                            if (success)
-                            {
-                                onLoad(res.Asset as GameObject);
-                            }
-                        });
-                    mResLoader.LoadAsync();
-                    return;
-                }
-
-                mResLoader.Add2Load<GameObject>(panelSearchKeys.GameObjName, (success, res) =>
-                {
-                    if (success)
-                    {
-                        onLoad(res.Asset as GameObject);
-                    }
-                });
-                mResLoader.LoadAsync();
+                    mHandle = handle;
+                    var prefab = op.AssetObject as GameObject;
+                    ValidatePrefab(prefab, location, panelSearchKeys.AssetBundleName);
+                    onLoad?.Invoke(prefab);
+                };
             }
 
             public void Unload()
             {
-                mResLoader?.Recycle2Cache();
-                mResLoader = null;
+                if (mHandle != null)
+                {
+                    mHandle.Dispose();
+                    mHandle = null;
+                }
+            }
+
+            private static void EnsureInitialized()
+            {
+                if (!ResMgr.ResMgrInited)
+                    throw new InvalidOperationException("[UIKit] ResKit is not initialized.");
+
+                if (!YooAssetBridge.IsInitialized)
+                    throw new InvalidOperationException("[UIKit] YooAsset default package is not ready.");
+            }
+
+            private static string ResolveLocation(PanelSearchKeys panelSearchKeys)
+            {
+                var location = panelSearchKeys.GameObjName;
+                if (location.IsNullOrEmpty() && panelSearchKeys.PanelType.IsNotNull())
+                    location = panelSearchKeys.PanelType.Name;
+
+                if (location.IsNullOrEmpty())
+                    throw new InvalidOperationException("[UIKit] Panel asset location is empty.");
+
+                return location;
+            }
+
+            private static void ValidatePrefab(
+                GameObject prefab, string location, string assetBundleName)
+            {
+                if (prefab == null)
+                {
+                    throw new InvalidOperationException(
+                        $"[UIKit] YooAsset failed to load panel '{location}'. " +
+                        $"Bundle='{assetBundleName ?? "<address-only>"}'.");
+                }
+
+                if (prefab.GetComponent<UIPanel>() == null)
+                {
+                    throw new InvalidOperationException(
+                        $"[UIKit] Prefab '{location}' does not contain a UIPanel component.");
+                }
             }
         }
 

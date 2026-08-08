@@ -11,32 +11,33 @@ namespace Game.Level.State
     /// <summary>
     /// 关卡状态枚举
     /// 
-    /// Enter   → Prepare → Ready → Playing ↔ Pause → Win/Lose → Exit
+    /// 流程: LobbyToLevel → LoadLevel → LevelReady → LevelRunning ↔ LevelPause 
+    ///       → LevelSuccess/LevelFail → LevelToLobby
     /// </summary>
     public enum LevelState
     {
-        /// <summary>进入关卡（加载配置）</summary>
-        Enter,
+        /// <summary>大厅→关卡（过场动画）</summary>
+        LobbyToLevel,
 
-        /// <summary>准备阶段（预留道具逻辑）</summary>
-        Prepare,
+        /// <summary>加载关卡资源和配置</summary>
+        LoadLevel,
 
-        /// <summary>就绪（初始化棋盘）</summary>
-        Ready,
+        /// <summary>关卡就绪（初始化完成，可能有额外操作）</summary>
+        LevelReady,
 
-        /// <summary>游戏进行中（处理玩家操作、计分、倒计时）</summary>
-        Playing,
+        /// <summary>关卡进行中</summary>
+        LevelRunning,
 
-        /// <summary>暂停</summary>
-        Pause,
+        /// <summary>关卡暂停</summary>
+        LevelPause,
 
-        /// <summary>胜利</summary>
-        Win,
+        /// <summary>关卡胜利</summary>
+        LevelSuccess,
 
-        /// <summary>失败</summary>
-        Lose,
+        /// <summary>关卡失败</summary>
+        LevelFail,
 
-        /// <summary>退出关卡</summary>
-        Exit,
+        /// <summary>关卡→大厅（过场动画）</summary>
+        LevelToLobby,
     }
 }

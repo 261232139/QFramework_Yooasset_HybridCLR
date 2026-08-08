@@ -7,7 +7,9 @@
         "ResKit",
         "UIKit",
         "AudioKit",
-        "Launch"
+        "Launch",
+        "Unity.TextMeshPro",
+        "Game"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

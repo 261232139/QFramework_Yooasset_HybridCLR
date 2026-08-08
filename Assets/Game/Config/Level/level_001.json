@@ -1,0 +1,208 @@
+{
+    "schemaVersion": 1,
+    "levelId": "level_20260809_020633",
+    "sceneType": 0,
+    "difficulty": 1,
+    "board": {
+        "width": 5,
+        "height": 5,
+        "rows": [
+            {
+                "cells": [
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    }
+                ]
+            },
+            {
+                "cells": [
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    }
+                ]
+            },
+            {
+                "cells": [
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    }
+                ]
+            },
+            {
+                "cells": [
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    }
+                ]
+            },
+            {
+                "cells": [
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    },
+                    {
+                        "cellType": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "pieces": [
+        {
+            "id": "peg_000",
+            "pieceType": 0,
+            "isMovable": true,
+            "position": {
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "id": "peg_001",
+            "pieceType": 0,
+            "isMovable": true,
+            "position": {
+                "x": 2,
+                "y": 1
+            }
+        },
+        {
+            "id": "peg_002",
+            "pieceType": 0,
+            "isMovable": true,
+            "position": {
+                "x": 2,
+                "y": 2
+            }
+        },
+        {
+            "id": "peg_003",
+            "pieceType": 0,
+            "isMovable": false,
+            "position": {
+                "x": 3,
+                "y": 2
+            }
+        },
+        {
+            "id": "peg_004",
+            "pieceType": 0,
+            "isMovable": true,
+            "position": {
+                "x": 2,
+                "y": 3
+            }
+        },
+        {
+            "id": "peg_005",
+            "pieceType": 0,
+            "isMovable": true,
+            "position": {
+                "x": 1,
+                "y": 1
+            }
+        },
+        {
+            "id": "gem_006",
+            "pieceType": 1,
+            "isMovable": true,
+            "position": {
+                "x": 3,
+                "y": 3
+            }
+        },
+        {
+            "id": "gem_007",
+            "pieceType": 1,
+            "isMovable": true,
+            "position": {
+                "x": 4,
+                "y": 3
+            }
+        },
+        {
+            "id": "gem_008",
+            "pieceType": 1,
+            "isMovable": true,
+            "position": {
+                "x": 4,
+                "y": 4
+            }
+        },
+        {
+            "id": "gem_009",
+            "pieceType": 1,
+            "isMovable": true,
+            "position": {
+                "x": 3,
+                "y": 4
+            }
+        },
+        {
+            "id": "gem_010",
+            "pieceType": 1,
+            "isMovable": true,
+            "position": {
+                "x": 1,
+                "y": 4
+            }
+        }
+    ]
+}

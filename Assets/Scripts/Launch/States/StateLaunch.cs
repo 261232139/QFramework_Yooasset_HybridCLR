@@ -2,9 +2,6 @@
  * Copyright (c) 2024 liangxiegame UNDER MIT License
  *
  * StateLaunch — YooAsset 全局初始化 + 资源包就绪
- *
- * 约束: 此状态内不得调用任何游戏业务代码。
- *       只允许使用 YooAsset / YooAssetBridge API。
  ****************************************************************************/
 
 using System.Collections;
@@ -26,23 +23,23 @@ namespace Launch
 
         private IEnumerator Run()
         {
-            var ctx = LaunchContext.Instance;
+            var context = LaunchContext.Instance;
 
             if (!YooAssets.IsInitialized)
                 YooAssets.Initialize();
 
-            if (!YooAssets.TryGetPackage(ctx.PackageName, out var package))
-                package = YooAssets.CreatePackage(ctx.PackageName);
+            if (!YooAssets.TryGetPackage(context.PackageName, out var package))
+                package = YooAssets.CreatePackage(context.PackageName);
 
             if (package.InitializeStatus == EOperationStatus.None)
             {
-                var op = package.InitializePackageAsync(
-                    YooAssetBridge.CreateDefaultInitOptions(ctx.PackageName));
-                yield return op;
+                var operation = package.InitializePackageAsync(
+                    YooAssetBridge.CreateDefaultInitOptions(context.PackageName));
+                yield return operation;
 
-                if (op.Status != EOperationStatus.Succeeded)
+                if (operation.Status != EOperationStatus.Succeeded)
                 {
-                    Debug.LogError($"[Launch] 资源包初始化失败: {op.Error}");
+                    Debug.LogError($"[Launch] 资源包初始化失败: {operation.Error}");
                     yield break;
                 }
             }
@@ -58,10 +55,10 @@ namespace Launch
                 }
             }
 
-            ctx.DefaultPackage = package;
-            ctx.Progress = 0.1f;
+            context.DefaultPackage = package;
+            YooAssetBridge.BindInitializedPackage(package);
+            context.Progress = 0.1f;
             Debug.Log("[Launch] 资源包就绪");
-
             mFSM.ChangeState(LaunchState.HotCheckVersion);
         }
     }

@@ -2,8 +2,6 @@
  * Copyright (c) 2024 liangxiegame UNDER MIT License
  *
  * StateLoadModules — 加载 HybridCLR DLL + 初始化游戏模块
- *
- * 约束: 热更完成后，首次允许调用游戏框架代码（ResKit / UIKit / AudioKit）。
  ****************************************************************************/
 
 using System.Collections;
@@ -24,26 +22,23 @@ namespace HotUpdate
 
         private IEnumerator Run()
         {
-            var ctx = Launch.LaunchContext.Instance;
+            var context = Launch.LaunchContext.Instance;
+            yield return LoadHotUpdateDll(context.HotUpdateDllLocation);
 
-            // 1. 加载 HybridCLR 热更新 DLL（热更资源已就绪，此处才安全加载）
-            yield return LoadHotUpdateDll(ctx.HotUpdateDllLocation);
+            if (!YooAssetBridge.IsInitialized)
+                YooAssetBridge.BindInitializedPackage(context.DefaultPackage);
 
-            // 2. 初始化 ResKit
             if (!YooAssetBridge.IsInitialized)
             {
-                ResKit.Init();
-                Debug.Log("[LoadModules] ResKit 初始化完成");
+                Debug.LogError("[LoadModules] YooAsset 默认资源包未就绪，无法初始化游戏模块。");
+                yield break;
             }
 
-            // 3. UIKit PanelLoaderPool 由 SupportOldQF.UIKitWithResKitInit 在场景加载前自动设置，无需手动初始化
-            Debug.Log("[LoadModules] UIKit 就绪");
+            if (!ResMgr.ResMgrInited)
+                ResKit.Init();
 
-            // 4. AudioKit 依赖 ResKit，无需额外初始化
-            Debug.Log("[LoadModules] AudioKit 就绪");
-
-            ctx.Progress = 0.9f;
-            Debug.Log("[LoadModules] 游戏模块加载完成");
+            Debug.Log("[LoadModules] ResKit、UIKit、AudioKit 就绪");
+            context.Progress = 0.9f;
             mFSM.ChangeState(HotUpdateState.EnterLobby);
         }
 
@@ -52,10 +47,11 @@ namespace HotUpdate
 #if !ENABLE_HYBRIDCLR || UNITY_EDITOR
             Debug.Log("[LoadModules] HybridCLR 未启用，跳过 DLL 加载");
             yield break;
-#endif
-            var loader   = ResLoader.Allocate();
-            var dllRes   = loader.LoadResSync(
-                ResSearchKeys.Allocate(dllLocation, null, typeof(TextAsset)));
+#else
+            var loader = ResLoader.Allocate();
+            var searchKeys = ResSearchKeys.Allocate(dllLocation, null, typeof(TextAsset));
+            var dllRes = loader.LoadResSync(searchKeys);
+            searchKeys.Recycle2Cache();
             var dllAsset = dllRes?.Asset as TextAsset;
 
             if (dllAsset == null)
@@ -68,6 +64,7 @@ namespace HotUpdate
             System.Reflection.Assembly.Load(dllAsset.bytes);
             Debug.Log("[LoadModules] HybridCLR DLL 加载成功");
             loader.Recycle2Cache();
+#endif
         }
     }
 }

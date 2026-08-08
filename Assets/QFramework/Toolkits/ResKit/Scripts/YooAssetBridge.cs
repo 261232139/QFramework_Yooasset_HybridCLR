@@ -39,6 +39,18 @@ namespace QFramework
         /// </summary>
         public static bool IsInitialized => sDefaultPackage != null;
 
+        public static void BindInitializedPackage(ResourcePackage package)
+        {
+            if (package == null || package.InitializeStatus != EOperationStatus.Succeeded)
+            {
+                Debug.LogError("[YooAssetBridge] Cannot bind an uninitialized package.");
+                return;
+            }
+
+            sDefaultPackage = package;
+            Debug.Log($"[YooAssetBridge] Bound initialized package: {package.PackageName}");
+        }
+
         /// <summary>
         /// 初始化 YooAsset 并创建默认资源包（异步启动，不阻塞主线程）
         /// </summary>
