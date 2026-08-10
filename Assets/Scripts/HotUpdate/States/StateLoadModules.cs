@@ -7,6 +7,7 @@
 using System.Collections;
 using UnityEngine;
 using QFramework;
+using HotUpdate.Game;
 
 namespace HotUpdate
 {
@@ -36,6 +37,8 @@ namespace HotUpdate
 
             if (!ResMgr.ResMgrInited)
                 ResKit.Init();
+
+            GameManager.Instance.Init();
 
             Debug.Log("[LoadModules] ResKit、UIKit、AudioKit 就绪");
             context.Progress = 0.9f;

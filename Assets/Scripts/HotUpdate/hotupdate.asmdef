@@ -9,7 +9,8 @@
         "AudioKit",
         "Launch",
         "Unity.TextMeshPro",
-        "Game"
+        "Game",
+        "EasySave3"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

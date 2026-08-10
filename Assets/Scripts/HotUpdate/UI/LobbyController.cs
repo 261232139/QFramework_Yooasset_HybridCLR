@@ -2,6 +2,7 @@ using Game.Level.Data;
 using Game.Level.State;
 using QFramework;
 using UnityEngine;
+using HotUpdate.LocalStorageKit;
 
 namespace HotUpdate.UI
 {
@@ -11,7 +12,8 @@ namespace HotUpdate.UI
         private static readonly LobbyController sInstance = new LobbyController();
 
         public static LobbyController Instance => sInstance;
-        public int CurrentLevel { get; private set; } = 1;
+        
+        public int CurrentLevel => PlayerDataController.Instance.CurrentLevelID;
 
         private bool mIsLoadingLevel;
         private MonoBehaviour mCoroutineHost;
@@ -19,7 +21,6 @@ namespace HotUpdate.UI
 
         private LobbyController()
         {
-            // 监听关卡事件
             LevelEventManager.OnLevelEvent += OnLevelEvent;
         }
 
@@ -36,9 +37,6 @@ namespace HotUpdate.UI
                 Debug.Log("[LobbyController] Lobby opened");
         }
 
-        /// <summary>
-        /// 进入关卡（从大厅按钮触发）
-        /// </summary>
         public void EnterLevel(int levelNumber)
         {
             if (mIsLoadingLevel)
@@ -47,10 +45,9 @@ namespace HotUpdate.UI
                 return;
             }
 
-            CurrentLevel = Mathf.Max(1, levelNumber);
+            levelNumber = Mathf.Max(1, levelNumber);
             mIsLoadingLevel = true;
             
-            // 隐藏大厅UI
             UIKit.HidePanel<LobbyPanel>();
             
             if (mCoroutineHost == null)
@@ -61,41 +58,29 @@ namespace HotUpdate.UI
                 return;
             }
 
-            // 开始加载关卡
-            mCoroutineHost.StartCoroutine(LoadAndStartLevel(CurrentLevel));
+            mCoroutineHost.StartCoroutine(LoadAndStartLevel(levelNumber));
         }
 
-        /// <summary>
-        /// 返回大厅（从关卡结束后调用）
-        /// </summary>
         public void ReturnToLobby()
         {
             mIsLoadingLevel = false;
             
-            // 清理状态机引用
             if (mLevelStateMachine != null)
             {
                 Object.Destroy(mLevelStateMachine.gameObject);
                 mLevelStateMachine = null;
             }
             
-            // 重新打开大厅UI
             Open();
             Debug.Log("[LobbyController] Returned to lobby");
         }
 
-        /// <summary>
-        /// 关卡完成（胜利）
-        /// </summary>
         public void CompleteLevel()
         {
-            CurrentLevel++;
+            PlayerDataController.Instance.UnlockNextLevel();
             Debug.Log($"[LobbyController] Level completed! Next level: {CurrentLevel}");
         }
 
-        /// <summary>
-        /// 关卡失败
-        /// </summary>
         public void FailLevel()
         {
             Debug.Log($"[LobbyController] Level {CurrentLevel} failed");
@@ -117,7 +102,6 @@ namespace HotUpdate.UI
                 yield break;
             }
 
-            // 创建或获取状态机
             mLevelStateMachine = Object.FindFirstObjectByType<LevelStateMachine>();
             if (mLevelStateMachine == null)
             {
@@ -125,16 +109,12 @@ namespace HotUpdate.UI
                 mLevelStateMachine = stateMachineObject.AddComponent<LevelStateMachine>();
             }
 
-            // 启动关卡状态机
             mLevelStateMachine.Begin(config, levelNumber, mCoroutineHost);
             mIsLoadingLevel = false;
             
             Debug.Log($"[LobbyController] Level {levelNumber} started: {config.levelId}");
         }
 
-        /// <summary>
-        /// 处理关卡事件
-        /// </summary>
         private void OnLevelEvent(LevelEventArgs args)
         {
             switch (args.EventType)
@@ -148,7 +128,6 @@ namespace HotUpdate.UI
                     break;
                     
                 case LevelEventType.ReturnedToLobby:
-                    // 关卡已返回大厅，可以做一些清理工作
                     Debug.Log("[LobbyController] Level returned to lobby event received");
                     break;
             }
