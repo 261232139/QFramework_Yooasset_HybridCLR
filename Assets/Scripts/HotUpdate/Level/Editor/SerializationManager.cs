@@ -7,7 +7,7 @@ namespace Game.Level.Editor
 {
     public static class SerializationManager
     {
-        private const string ConfigPath = "Assets/Game/Config";
+        private const string ConfigPath = "Assets/Game/Config/Level/";
 
         public static bool Save(LevelConfig config, string fileName, bool createBackup = true)
         {

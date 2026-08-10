@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Game.Level.Data;
 using UnityEditor;
 using UnityEngine;
@@ -35,16 +36,13 @@ namespace Game.Level.Editor
         public void Draw()
         {
             EditorGUILayout.BeginVertical();
-
             DrawBoardView();
-
             EditorGUILayout.EndVertical();
         }
-
+        
         private void DrawBoardView()
         {
             var rect = GUILayoutUtility.GetRect(400, 400, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
-
             EditorGUI.DrawRect(rect, new Color(0.2f, 0.2f, 0.2f));
 
             HandleBoardInput(rect);
@@ -52,7 +50,6 @@ namespace Game.Level.Editor
             var board = editorData.CurrentConfig.board;
             var totalWidth = board.width * cellDisplaySize;
             var totalHeight = board.height * cellDisplaySize;
-
             var startX = rect.x + (rect.width - totalWidth) * 0.5f + viewOffset.x;
             var startY = rect.y + (rect.height - totalHeight) * 0.5f + viewOffset.y;
 
@@ -66,13 +63,11 @@ namespace Game.Level.Editor
                         cellDisplaySize - 2,
                         cellDisplaySize - 2
                     );
-
                     DrawCell(cellRect, x, y);
                 }
             }
 
             DrawPiecesOnBoard(startX, startY);
-
             GUILayout.Label($"Mode: {CurrentMode} | Zoom: {cellDisplaySize:F0}px", EditorStyles.miniLabel);
         }
 
@@ -80,7 +75,6 @@ namespace Game.Level.Editor
         {
             var cell = editorData.CurrentConfig.board.GetCell(x, y);
             var position = new GridPosition(x, y);
-
             var isSelected = SelectedCell.HasValue && SelectedCell.Value.Equals(position);
             var isHovered = rect.Contains(Event.current.mousePosition);
 
@@ -102,7 +96,7 @@ namespace Game.Level.Editor
                 GUI.Label(rect, $"{x},{y}", labelStyle);
             }
         }
-
+        
         private void DrawPiecesOnBoard(float startX, float startY)
         {
             foreach (var piece in editorData.CurrentConfig.pieces)
@@ -116,7 +110,6 @@ namespace Game.Level.Editor
 
                 var isSelected = SelectedPiece == piece;
                 var pieceColor = GetPieceColor(piece.pieceType, isSelected);
-
                 EditorGUI.DrawRect(pieceRect, pieceColor);
 
                 var labelStyle = new GUIStyle(EditorStyles.boldLabel)
@@ -164,6 +157,35 @@ namespace Game.Level.Editor
                             HandleCellClick(cellX, cellY);
                             e.Use();
                         }
+                        else if (e.button == 1)
+                        {
+                            HandleCellRightClick(cellX, cellY);
+                            e.Use();
+                        }
+                    }
+                }
+            }
+
+            HandleKeyboardInput();
+        }
+
+        private void HandleKeyboardInput()
+        {
+            var e = Event.current;
+
+            if (e.type == EventType.KeyDown)
+            {
+                if (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace)
+                {
+                    if (CurrentMode == EditMode.Board && SelectedCell.HasValue)
+                    {
+                        DeleteSelectedCell();
+                        e.Use();
+                    }
+                    else if (CurrentMode == EditMode.Piece && SelectedPiece != null)
+                    {
+                        DeleteSelectedPiece();
+                        e.Use();
                     }
                 }
             }
@@ -189,6 +211,104 @@ namespace Game.Level.Editor
                 else
                 {
                     AddPieceAt(x, y);
+                }
+            }
+        }
+        
+        private void HandleCellRightClick(int x, int y)
+        {
+            SelectedCell = new GridPosition(x, y);
+
+            if (CurrentMode == EditMode.Board)
+            {
+                var menu = new GenericMenu();
+                var cell = editorData.CurrentConfig.board.GetCell(x, y);
+                var currentType = cell.cellType;
+                
+                menu.AddItem(new GUIContent("Set Playable"), currentType == BoardCellType.Playable, () =>
+                {
+                    editorData.RecordUndo();
+                    cell.cellType = BoardCellType.Playable;
+                });
+                
+                menu.AddItem(new GUIContent("Set Void"), currentType == BoardCellType.Void, () =>
+                {
+                    editorData.RecordUndo();
+                    cell.cellType = BoardCellType.Void;
+                });
+
+                menu.AddSeparator("");
+                
+                menu.AddItem(new GUIContent("Delete Cell (Set to Void)"), false, () =>
+                {
+                    editorData.RecordUndo();
+                    cell.cellType = BoardCellType.Void;
+                    
+                    var piecesToRemove = new List<PieceData>();
+                    foreach (var piece in editorData.CurrentConfig.pieces)
+                    {
+                        if (piece.position.x == x && piece.position.y == y)
+                            piecesToRemove.Add(piece);
+                    }
+                    foreach (var piece in piecesToRemove)
+                        editorData.CurrentConfig.pieces.Remove(piece);
+                });
+
+                menu.ShowAsContext();
+            }
+            else if (CurrentMode == EditMode.Piece)
+            {
+                var existingPiece = FindPieceAt(x, y);
+                
+                if (existingPiece != null)
+                {
+                    var menu = new GenericMenu();
+                    
+                    menu.AddItem(new GUIContent($"Select Piece ({existingPiece.id})"), false, () =>
+                    {
+                        SelectedPiece = existingPiece;
+                    });
+
+                    menu.AddSeparator("");
+
+                    menu.AddItem(new GUIContent("Delete Piece"), false, () =>
+                    {
+                        editorData.RecordUndo();
+                        editorData.CurrentConfig.pieces.Remove(existingPiece);
+                        if (SelectedPiece == existingPiece)
+                            SelectedPiece = null;
+                    });
+
+                    menu.AddSeparator("");
+
+                    menu.AddItem(new GUIContent("Toggle Movable"), false, () =>
+                    {
+                        editorData.RecordUndo();
+                        existingPiece.isMovable = !existingPiece.isMovable;
+                        editorData.IsDirty = true;
+                    });
+
+                    foreach (PieceType type in System.Enum.GetValues(typeof(PieceType)))
+                    {
+                        var typeCopy = type;
+                        menu.AddItem(new GUIContent($"Change Type/{type}"), existingPiece.pieceType == type, () =>
+                        {
+                            editorData.RecordUndo();
+                            existingPiece.pieceType = typeCopy;
+                            editorData.IsDirty = true;
+                        });
+                    }
+
+                    menu.ShowAsContext();
+                }
+                else
+                {
+                    var menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Add Piece Here"), false, () =>
+                    {
+                        AddPieceAt(x, y);
+                    });
+                    menu.ShowAsContext();
                 }
             }
         }
@@ -227,6 +347,48 @@ namespace Game.Level.Editor
 
             editorData.CurrentConfig.pieces.Add(piece);
             SelectedPiece = piece;
+        }
+        
+        private void DeleteSelectedCell()
+        {
+            if (!SelectedCell.HasValue)
+                return;
+
+            editorData.RecordUndo();
+
+            var x = SelectedCell.Value.x;
+            var y = SelectedCell.Value.y;
+            var cell = editorData.CurrentConfig.board.GetCell(x, y);
+            
+            cell.cellType = BoardCellType.Void;
+
+            var piecesToRemove = new System.Collections.Generic.List<PieceData>();
+            foreach (var piece in editorData.CurrentConfig.pieces)
+            {
+                if (piece.position.x == x && piece.position.y == y)
+                    piecesToRemove.Add(piece);
+            }
+            
+            foreach (var piece in piecesToRemove)
+            {
+                editorData.CurrentConfig.pieces.Remove(piece);
+                if (SelectedPiece == piece)
+                    SelectedPiece = null;
+            }
+
+            Debug.Log($"Deleted cell at ({x}, {y}) and {piecesToRemove.Count} piece(s)");
+        }
+
+        private void DeleteSelectedPiece()
+        {
+            if (SelectedPiece == null)
+                return;
+
+            editorData.RecordUndo();
+            editorData.CurrentConfig.pieces.Remove(SelectedPiece);
+            
+            Debug.Log($"Deleted piece: {SelectedPiece.id}");
+            SelectedPiece = null;
         }
 
         public void FillBoard(BoardCellType cellType)

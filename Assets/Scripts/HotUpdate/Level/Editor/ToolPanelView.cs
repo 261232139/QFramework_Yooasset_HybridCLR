@@ -64,6 +64,9 @@ namespace Game.Level.Editor
                 editorData.RecordUndo();
                 boardView.FillBoard(BoardCellType.Void);
             }
+
+            EditorGUILayout.Space();
+            EditorGUILayout.HelpBox("Tips:\n• Left-click to paint cell\n• Right-click for menu\n• Delete key to remove cell", MessageType.Info);
         }
 
         private void DrawPieceTools()
@@ -78,6 +81,8 @@ namespace Game.Level.Editor
             if (boardView.SelectedPiece != null)
             {
                 GUILayout.Label("Selected Piece", EditorStyles.boldLabel);
+                
+                EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 EditorGUILayout.LabelField("ID", boardView.SelectedPiece.id);
                 EditorGUILayout.LabelField("Position", boardView.SelectedPiece.position.ToString());
 
@@ -87,12 +92,19 @@ namespace Game.Level.Editor
                 if (EditorGUI.EndChangeCheck())
                     editorData.IsDirty = true;
 
-                if (GUILayout.Button("Delete Piece"))
+                EditorGUILayout.Space();
+                
+                var originalColor = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
+                if (GUILayout.Button("Delete Piece (Del)"))
                 {
                     editorData.RecordUndo();
                     editorData.CurrentConfig.pieces.Remove(boardView.SelectedPiece);
                     boardView.SelectedPiece = null;
                 }
+                GUI.backgroundColor = originalColor;
+                
+                EditorGUILayout.EndVertical();
             }
 
             EditorGUILayout.Space();
@@ -105,11 +117,25 @@ namespace Game.Level.Editor
                 var style = boardView.SelectedPiece == piece ? EditorStyles.helpBox : GUI.skin.box;
                 EditorGUILayout.BeginVertical(style);
 
+                EditorGUILayout.BeginHorizontal();
+                
                 if (GUILayout.Button($"{piece.id} ({piece.pieceType})", EditorStyles.miniButton))
                 {
                     boardView.SelectedPiece = piece;
                 }
-
+                
+                var originalColor = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(1f, 0.6f, 0.6f);
+                if (GUILayout.Button("X", GUILayout.Width(20)))
+                {
+                    editorData.RecordUndo();
+                    editorData.CurrentConfig.pieces.Remove(piece);
+                    if (boardView.SelectedPiece == piece)
+                        boardView.SelectedPiece = null;
+                }
+                GUI.backgroundColor = originalColor;
+                
+                EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical();
             }
 
@@ -124,6 +150,9 @@ namespace Game.Level.Editor
                     boardView.SelectedPiece = null;
                 }
             }
+            
+            EditorGUILayout.Space();
+            EditorGUILayout.HelpBox("Tips:\n• Click empty cell to add piece\n• Click piece to select\n• Right-click piece for menu\n• Delete key to remove piece", MessageType.Info);
         }
     }
 }

@@ -55,14 +55,15 @@ namespace HotUpdate.LocalStorageKit
         {
             if (ES3.KeyExists(SAVE_KEY))
             {
-                mPlayerData = ES3.Load<PlayerData>(SAVE_KEY);
+                string json = ES3.Load<string>(SAVE_KEY);
+                mPlayerData = JsonUtility.FromJson<PlayerData>(json);
                 Debug.Log($"[PlayerDataController] 数据加载成功: {mPlayerData}");
             }
             else
             {
                 mPlayerData = new PlayerData();
                 Debug.Log("[PlayerDataController] 未找到存档，创建新数据");
-                Save();
+                MarkDirty();
             }
         }
 
@@ -70,7 +71,8 @@ namespace HotUpdate.LocalStorageKit
         {
             if (mPlayerData == null) return;
             
-            ES3.Save<PlayerData>(SAVE_KEY, mPlayerData);
+            string json = JsonUtility.ToJson(mPlayerData);
+            ES3.Save<string>(SAVE_KEY, json);
             Debug.Log($"[PlayerDataController] 数据已保存: {mPlayerData}");
         }
 

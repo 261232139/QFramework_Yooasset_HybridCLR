@@ -3,6 +3,7 @@
  * 
  * 职责：管理游戏设置数据（音量、画质等）
  * 使用延时存储模式，降低频繁保存的性能开销
+ * 使用 EasySave3 进行持久化存储
  ****************************************************************************/
 
 using UnityEngine;
@@ -108,14 +109,15 @@ namespace HotUpdate.LocalStorageKit
         {
             if (ES3.KeyExists(SAVE_KEY))
             {
-                mSettingsData = ES3.Load<GameSettingsData>(SAVE_KEY);
+                string json = ES3.Load<string>(SAVE_KEY);
+                mSettingsData = JsonUtility.FromJson<GameSettingsData>(json);
                 Debug.Log($"[GameSettingsController] 设置加载成功: {mSettingsData}");
             }
             else
             {
                 mSettingsData = new GameSettingsData();
                 Debug.Log("[GameSettingsController] 未找到设置，使用默认值");
-                Save();
+                MarkDirty();
             }
         }
 
@@ -123,7 +125,8 @@ namespace HotUpdate.LocalStorageKit
         {
             if (mSettingsData == null) return;
 
-            ES3.Save<GameSettingsData>(SAVE_KEY, mSettingsData);
+            string json = JsonUtility.ToJson(mSettingsData);
+            ES3.Save<string>(SAVE_KEY, json);
             Debug.Log($"[GameSettingsController] 设置已保存: {mSettingsData}");
         }
 
