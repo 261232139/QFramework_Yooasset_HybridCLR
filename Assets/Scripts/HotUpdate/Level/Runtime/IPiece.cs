@@ -108,8 +108,8 @@ namespace Game.Level.Runtime
         /// <summary>检查位置是否在棋盘内</summary>
         bool IsInBounds(GridPosition position);
 
-        /// <summary>检查位置是否可玩（非障碍）</summary>
-        bool IsPlayable(GridPosition position);
+        /// <summary>检查位置是否存在格子</summary>
+        bool HasCell(GridPosition position);
 
         /// <summary>获取指定位置的棋子</summary>
         IPiece GetPieceAt(GridPosition position);

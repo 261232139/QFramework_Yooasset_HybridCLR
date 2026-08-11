@@ -56,12 +56,9 @@ namespace Game.Level.Runtime
                    position.y >= 0 && position.y < Height;
         }
 
-        public bool IsPlayable(GridPosition position)
+        public bool HasCell(GridPosition position)
         {
-            if (!IsInBounds(position))
-                return false;
-
-            return mConfig.board.IsPlayable(position.x, position.y);
+            return IsInBounds(position) && mConfig.board.HasCell(position.x, position.y);
         }
 
         public IPiece GetPieceAt(GridPosition position)

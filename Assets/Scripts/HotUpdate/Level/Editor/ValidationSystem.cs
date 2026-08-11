@@ -72,7 +72,7 @@ namespace Game.Level.Editor
                 return;
             }
 
-            var playableCells = 0;
+            var cellCount = 0;
             for (var y = 0; y < board.height; y++)
             {
                 var row = board.rows[y];
@@ -84,22 +84,13 @@ namespace Game.Level.Editor
 
                 for (var x = 0; x < board.width; x++)
                 {
-                    if (row.cells[x] == null)
-                        messages.Add(new ValidationMessage(ValidationLevel.Error, $"Cell ({x}, {y}) is null"));
-                    else if (row.cells[x].IsPlayable)
-                        playableCells++;
+                    if (row.cells[x] != null)
+                        cellCount++;
                 }
             }
 
-            if (playableCells == 0)
-                messages.Add(new ValidationMessage(ValidationLevel.Error, "Board has no playable cells"));
-            else if (playableCells < 10)
-                messages.Add(new ValidationMessage(ValidationLevel.Warning, $"Only {playableCells} playable cells (recommended: 10+)"));
-
-            var totalCells = board.width * board.height;
-            var voidRatio = 1.0f - (playableCells / (float)totalCells);
-            if (voidRatio > 0.5f)
-                messages.Add(new ValidationMessage(ValidationLevel.Warning, $"High void ratio ({voidRatio:P0}), board may feel empty"));
+            if (cellCount == 0)
+                messages.Add(new ValidationMessage(ValidationLevel.Error, "Board has no cells"));
         }
 
         private static void ValidatePieces(LevelConfig config, List<ValidationMessage> messages)
@@ -133,8 +124,8 @@ namespace Game.Level.Editor
                 else if (!pieceIds.Add(piece.id))
                     messages.Add(new ValidationMessage(ValidationLevel.Error, $"Duplicate piece ID: {piece.id}"));
 
-                if (config.board != null && !config.board.IsPlayable(piece.position.x, piece.position.y))
-                    messages.Add(new ValidationMessage(ValidationLevel.Error, $"Piece {piece.id} at {piece.position} is on non-playable cell"));
+                if (config.board != null && !config.board.HasCell(piece.position.x, piece.position.y))
+                    messages.Add(new ValidationMessage(ValidationLevel.Error, $"Piece {piece.id} at {piece.position} is not on a board cell"));
 
                 if (!positions.Add(piece.position))
                     messages.Add(new ValidationMessage(ValidationLevel.Error, $"Multiple pieces at {piece.position}"));

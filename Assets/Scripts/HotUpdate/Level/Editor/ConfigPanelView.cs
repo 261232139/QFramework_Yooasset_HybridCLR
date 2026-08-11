@@ -53,10 +53,9 @@ namespace Game.Level.Editor
             EditorGUILayout.Space();
             GUILayout.Label("Statistics", EditorStyles.boldLabel);
 
-            var playableCount = CountPlayableCells();
             var movableCount = CountMovablePieces();
 
-            EditorGUILayout.LabelField("Playable Cells", playableCount.ToString());
+            EditorGUILayout.LabelField("Board Cells", CountBoardCells().ToString());
             EditorGUILayout.LabelField("Total Pieces", config.pieces.Count.ToString());
             EditorGUILayout.LabelField("Movable Pieces", movableCount.ToString());
 
@@ -101,7 +100,7 @@ namespace Game.Level.Editor
             {
                 var row = new BoardRowData { cells = new System.Collections.Generic.List<BoardCellData>() };
                 for (var x = 0; x < newWidth; x++)
-                    row.cells.Add(new BoardCellData { cellType = BoardCellType.Playable });
+                    row.cells.Add(null);
                 board.rows.Add(row);
             }
 
@@ -112,7 +111,7 @@ namespace Game.Level.Editor
             {
                 var row = board.rows[y];
                 for (var x = row.cells.Count; x < newWidth; x++)
-                    row.cells.Add(new BoardCellData { cellType = BoardCellType.Playable });
+                    row.cells.Add(null);
 
                 while (row.cells.Count > newWidth)
                     row.cells.RemoveAt(row.cells.Count - 1);
@@ -123,7 +122,7 @@ namespace Game.Level.Editor
             );
         }
 
-        private int CountPlayableCells()
+        private int CountBoardCells()
         {
             var count = 0;
             var board = editorData.CurrentConfig.board;
@@ -131,7 +130,7 @@ namespace Game.Level.Editor
             {
                 for (var x = 0; x < board.width; x++)
                 {
-                    if (board.IsPlayable(x, y))
+                    if (board.HasCell(x, y))
                         count++;
                 }
             }

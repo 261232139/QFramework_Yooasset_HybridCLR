@@ -69,8 +69,6 @@ namespace Game.Level.Editor
             GUILayout.Label("Constraints", EditorStyles.boldLabel);
 
             var constraints = request.constraints;
-            constraints.minPlayableCells = EditorGUILayout.IntField("Min Playable Cells", constraints.minPlayableCells);
-            constraints.maxPlayableCells = EditorGUILayout.IntField("Max Playable Cells", constraints.maxPlayableCells);
             constraints.minPieceCount = EditorGUILayout.IntField("Min Piece Count", constraints.minPieceCount);
             constraints.maxPieceCount = EditorGUILayout.IntField("Max Piece Count", constraints.maxPieceCount);
             constraints.movablePieceRatio = EditorGUILayout.Slider("Movable Piece Ratio", constraints.movablePieceRatio, 0f, 1f);

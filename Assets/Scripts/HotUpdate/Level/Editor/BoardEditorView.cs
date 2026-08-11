@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Game.Level.Data;
 using UnityEditor;
 using UnityEngine;
@@ -7,20 +6,20 @@ namespace Game.Level.Editor
 {
     public class BoardEditorView
     {
-        private LevelEditorData editorData;
+        private readonly LevelEditorData editorData;
         private Vector2 viewOffset = Vector2.zero;
         private float cellDisplaySize = 40f;
         private const float MinCellSize = 20f;
         private const float MaxCellSize = 80f;
 
         public GridPosition? SelectedCell { get; private set; }
-        public PieceData SelectedPiece { get; set; }
-        public EditMode CurrentMode { get; set; } = EditMode.Board;
-        public BoardCellType PaintCellType { get; set; } = BoardCellType.Playable;
+        public PieceData SelectedPiece { get; private set; }
         public PieceType SelectedPieceType { get; set; } = PieceType.Peg;
         public bool NewPieceMovable { get; set; } = true;
-
-        public enum EditMode { Board, Piece }
+        public bool HasSelectedBoardCell => SelectedCell.HasValue &&
+                                            editorData.CurrentConfig.board.HasCell(
+                                                SelectedCell.Value.x,
+                                                SelectedCell.Value.y);
 
         public BoardEditorView(LevelEditorData editorData)
         {
@@ -33,13 +32,19 @@ namespace Game.Level.Editor
             SelectedPiece = null;
         }
 
+        public void SelectPiece(PieceData piece)
+        {
+            SelectedPiece = piece;
+            SelectedCell = piece == null ? (GridPosition?)null : piece.position;
+        }
+
         public void Draw()
         {
             EditorGUILayout.BeginVertical();
             DrawBoardView();
             EditorGUILayout.EndVertical();
         }
-        
+
         private void DrawBoardView()
         {
             var rect = GUILayoutUtility.GetRect(400, 400, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
@@ -61,42 +66,44 @@ namespace Game.Level.Editor
                         startX + x * cellDisplaySize,
                         startY + y * cellDisplaySize,
                         cellDisplaySize - 2,
-                        cellDisplaySize - 2
-                    );
+                        cellDisplaySize - 2);
                     DrawCell(cellRect, x, y);
                 }
             }
 
             DrawPiecesOnBoard(startX, startY);
-            GUILayout.Label($"Mode: {CurrentMode} | Zoom: {cellDisplaySize:F0}px", EditorStyles.miniLabel);
+            GUILayout.Label($"Zoom: {cellDisplaySize:F0}px", EditorStyles.miniLabel);
         }
 
         private void DrawCell(Rect rect, int x, int y)
         {
-            var cell = editorData.CurrentConfig.board.GetCell(x, y);
+            var board = editorData.CurrentConfig.board;
             var position = new GridPosition(x, y);
+            var hasCell = board.HasCell(x, y);
             var isSelected = SelectedCell.HasValue && SelectedCell.Value.Equals(position);
             var isHovered = rect.Contains(Event.current.mousePosition);
 
-            Color cellColor;
-            if (cell.IsPlayable)
-                cellColor = isSelected ? new Color(0.3f, 0.7f, 1f) : (isHovered ? new Color(0.9f, 0.9f, 0.9f) : Color.white);
+            Color color;
+            if (!hasCell)
+                color = isHovered ? new Color(0.35f, 0.35f, 0.35f) : new Color(0.25f, 0.25f, 0.25f);
+            else if (isSelected)
+                color = new Color(0.3f, 0.7f, 1f);
             else
-                cellColor = isSelected ? new Color(0.5f, 0.5f, 0.7f) : (isHovered ? new Color(0.6f, 0.6f, 0.6f) : new Color(0.4f, 0.4f, 0.4f));
+                color = isHovered ? new Color(0.9f, 0.9f, 0.9f) : Color.white;
 
-            EditorGUI.DrawRect(rect, cellColor);
+            EditorGUI.DrawRect(rect, color);
 
-            if (cellDisplaySize > 25f)
+            if (hasCell && cellDisplaySize > 25f)
             {
                 var labelStyle = new GUIStyle(EditorStyles.miniLabel)
                 {
                     alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = cell.IsPlayable ? Color.black : Color.gray }
+                    normal = { textColor = Color.black }
                 };
                 GUI.Label(rect, $"{x},{y}", labelStyle);
             }
         }
-        
+
         private void DrawPiecesOnBoard(float startX, float startY)
         {
             foreach (var piece in editorData.CurrentConfig.pieces)
@@ -105,24 +112,17 @@ namespace Game.Level.Editor
                     startX + piece.position.x * cellDisplaySize,
                     startY + piece.position.y * cellDisplaySize,
                     cellDisplaySize - 2,
-                    cellDisplaySize - 2
-                );
+                    cellDisplaySize - 2);
 
-                var isSelected = SelectedPiece == piece;
-                var pieceColor = GetPieceColor(piece.pieceType, isSelected);
-                EditorGUI.DrawRect(pieceRect, pieceColor);
+                EditorGUI.DrawRect(pieceRect, GetPieceColor(piece.pieceType, SelectedPiece == piece));
 
                 var labelStyle = new GUIStyle(EditorStyles.boldLabel)
                 {
                     alignment = TextAnchor.MiddleCenter,
                     normal = { textColor = Color.white }
                 };
-
                 var label = piece.pieceType.ToString()[0].ToString();
-                if (piece.isMovable)
-                    label = $">{label}<";
-
-                GUI.Label(pieceRect, label, labelStyle);
+                GUI.Label(pieceRect, piece.isMovable ? $">{label}<" : label, labelStyle);
             }
         }
 
@@ -134,183 +134,96 @@ namespace Game.Level.Editor
             {
                 if (e.type == EventType.ScrollWheel)
                 {
-                    cellDisplaySize -= e.delta.y * 2f;
-                    cellDisplaySize = Mathf.Clamp(cellDisplaySize, MinCellSize, MaxCellSize);
+                    cellDisplaySize = Mathf.Clamp(cellDisplaySize - e.delta.y * 2f, MinCellSize, MaxCellSize);
                     e.Use();
                 }
 
-                if (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
+                if (e.type == EventType.MouseDown)
                 {
                     var board = editorData.CurrentConfig.board;
-                    var totalWidth = board.width * cellDisplaySize;
-                    var totalHeight = board.height * cellDisplaySize;
-                    var startX = rect.x + (rect.width - totalWidth) * 0.5f + viewOffset.x;
-                    var startY = rect.y + (rect.height - totalHeight) * 0.5f + viewOffset.y;
-
+                    var startX = rect.x + (rect.width - board.width * cellDisplaySize) * 0.5f + viewOffset.x;
+                    var startY = rect.y + (rect.height - board.height * cellDisplaySize) * 0.5f + viewOffset.y;
                     var cellX = Mathf.FloorToInt((e.mousePosition.x - startX) / cellDisplaySize);
                     var cellY = Mathf.FloorToInt((e.mousePosition.y - startY) / cellDisplaySize);
 
                     if (board.IsInside(cellX, cellY))
                     {
                         if (e.button == 0)
-                        {
-                            HandleCellClick(cellX, cellY);
-                            e.Use();
-                        }
+                            HandleLeftClick(cellX, cellY);
                         else if (e.button == 1)
-                        {
-                            HandleCellRightClick(cellX, cellY);
-                            e.Use();
-                        }
+                            HandleRightClick(cellX, cellY);
+                        e.Use();
                     }
                 }
             }
 
-            HandleKeyboardInput();
-        }
-
-        private void HandleKeyboardInput()
-        {
-            var e = Event.current;
-
-            if (e.type == EventType.KeyDown)
+            if (e.type == EventType.KeyDown &&
+                (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace) &&
+                SelectedPiece != null)
             {
-                if (e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.Backspace)
-                {
-                    if (CurrentMode == EditMode.Board && SelectedCell.HasValue)
-                    {
-                        DeleteSelectedCell();
-                        e.Use();
-                    }
-                    else if (CurrentMode == EditMode.Piece && SelectedPiece != null)
-                    {
-                        DeleteSelectedPiece();
-                        e.Use();
-                    }
-                }
+                RemovePieceFromSelectedCell();
+                e.Use();
             }
         }
 
-        private void HandleCellClick(int x, int y)
+        private void HandleLeftClick(int x, int y)
         {
-            SelectedCell = new GridPosition(x, y);
-
-            if (CurrentMode == EditMode.Board)
+            var board = editorData.CurrentConfig.board;
+            if (!board.HasCell(x, y))
             {
                 editorData.RecordUndo();
-                var cell = editorData.CurrentConfig.board.GetCell(x, y);
-                cell.cellType = PaintCellType;
+                board.rows[y].cells[x] = new BoardCellData();
             }
-            else if (CurrentMode == EditMode.Piece)
-            {
-                var existingPiece = FindPieceAt(x, y);
-                if (existingPiece != null)
-                {
-                    SelectedPiece = existingPiece;
-                }
-                else
-                {
-                    AddPieceAt(x, y);
-                }
-            }
-        }
-        
-        private void HandleCellRightClick(int x, int y)
-        {
+
             SelectedCell = new GridPosition(x, y);
+            SelectedPiece = FindPieceAt(x, y);
+        }
 
-            if (CurrentMode == EditMode.Board)
+        private void HandleRightClick(int x, int y)
+        {
+            var board = editorData.CurrentConfig.board;
+            if (!board.HasCell(x, y))
+                return;
+
+            editorData.RecordUndo();
+            var removedPiece = FindPieceAt(x, y);
+            if (removedPiece != null)
+                editorData.CurrentConfig.pieces.Remove(removedPiece);
+            board.rows[y].cells[x] = null;
+
+            if (SelectedCell.HasValue && SelectedCell.Value.Equals(new GridPosition(x, y)))
+                ClearSelection();
+            else if (SelectedPiece == removedPiece)
+                SelectedPiece = null;
+        }
+
+        public void AddPieceToSelectedCell()
+        {
+            if (!HasSelectedBoardCell || SelectedPiece != null)
+                return;
+
+            editorData.RecordUndo();
+            var position = SelectedCell.Value;
+            var piece = new PieceData
             {
-                var menu = new GenericMenu();
-                var cell = editorData.CurrentConfig.board.GetCell(x, y);
-                var currentType = cell.cellType;
-                
-                menu.AddItem(new GUIContent("Set Playable"), currentType == BoardCellType.Playable, () =>
-                {
-                    editorData.RecordUndo();
-                    cell.cellType = BoardCellType.Playable;
-                });
-                
-                menu.AddItem(new GUIContent("Set Void"), currentType == BoardCellType.Void, () =>
-                {
-                    editorData.RecordUndo();
-                    cell.cellType = BoardCellType.Void;
-                });
+                id = CreateUniquePieceId(SelectedPieceType),
+                pieceType = SelectedPieceType,
+                isMovable = NewPieceMovable,
+                position = position
+            };
 
-                menu.AddSeparator("");
-                
-                menu.AddItem(new GUIContent("Delete Cell (Set to Void)"), false, () =>
-                {
-                    editorData.RecordUndo();
-                    cell.cellType = BoardCellType.Void;
-                    
-                    var piecesToRemove = new List<PieceData>();
-                    foreach (var piece in editorData.CurrentConfig.pieces)
-                    {
-                        if (piece.position.x == x && piece.position.y == y)
-                            piecesToRemove.Add(piece);
-                    }
-                    foreach (var piece in piecesToRemove)
-                        editorData.CurrentConfig.pieces.Remove(piece);
-                });
+            editorData.CurrentConfig.pieces.Add(piece);
+            SelectedPiece = piece;
+        }
 
-                menu.ShowAsContext();
-            }
-            else if (CurrentMode == EditMode.Piece)
-            {
-                var existingPiece = FindPieceAt(x, y);
-                
-                if (existingPiece != null)
-                {
-                    var menu = new GenericMenu();
-                    
-                    menu.AddItem(new GUIContent($"Select Piece ({existingPiece.id})"), false, () =>
-                    {
-                        SelectedPiece = existingPiece;
-                    });
+        public void RemovePieceFromSelectedCell()
+        {
+            if (!HasSelectedBoardCell || SelectedPiece == null)
+                return;
 
-                    menu.AddSeparator("");
-
-                    menu.AddItem(new GUIContent("Delete Piece"), false, () =>
-                    {
-                        editorData.RecordUndo();
-                        editorData.CurrentConfig.pieces.Remove(existingPiece);
-                        if (SelectedPiece == existingPiece)
-                            SelectedPiece = null;
-                    });
-
-                    menu.AddSeparator("");
-
-                    menu.AddItem(new GUIContent("Toggle Movable"), false, () =>
-                    {
-                        editorData.RecordUndo();
-                        existingPiece.isMovable = !existingPiece.isMovable;
-                        editorData.IsDirty = true;
-                    });
-
-                    foreach (PieceType type in System.Enum.GetValues(typeof(PieceType)))
-                    {
-                        var typeCopy = type;
-                        menu.AddItem(new GUIContent($"Change Type/{type}"), existingPiece.pieceType == type, () =>
-                        {
-                            editorData.RecordUndo();
-                            existingPiece.pieceType = typeCopy;
-                            editorData.IsDirty = true;
-                        });
-                    }
-
-                    menu.ShowAsContext();
-                }
-                else
-                {
-                    var menu = new GenericMenu();
-                    menu.AddItem(new GUIContent("Add Piece Here"), false, () =>
-                    {
-                        AddPieceAt(x, y);
-                    });
-                    menu.ShowAsContext();
-                }
-            }
+            editorData.RecordUndo();
+            editorData.CurrentConfig.pieces.Remove(SelectedPiece);
+            SelectedPiece = null;
         }
 
         private PieceData FindPieceAt(int x, int y)
@@ -324,82 +237,17 @@ namespace Game.Level.Editor
             return null;
         }
 
-        private void AddPieceAt(int x, int y)
+        private string CreateUniquePieceId(PieceType pieceType)
         {
-            if (!editorData.CurrentConfig.board.IsPlayable(x, y))
+            var prefix = pieceType.ToString().ToLower();
+            var index = 0;
+            while (true)
             {
-                EditorUtility.DisplayDialog("Invalid Position", "Cannot place piece on non-playable cell", "OK");
-                return;
-            }
-
-            editorData.RecordUndo();
-
-            var typePrefix = SelectedPieceType.ToString().ToLower();
-            var id = $"{typePrefix}_{editorData.CurrentConfig.pieces.Count:D3}";
-
-            var piece = new PieceData
-            {
-                id = id,
-                pieceType = SelectedPieceType,
-                isMovable = NewPieceMovable,
-                position = new GridPosition(x, y)
-            };
-
-            editorData.CurrentConfig.pieces.Add(piece);
-            SelectedPiece = piece;
-        }
-        
-        private void DeleteSelectedCell()
-        {
-            if (!SelectedCell.HasValue)
-                return;
-
-            editorData.RecordUndo();
-
-            var x = SelectedCell.Value.x;
-            var y = SelectedCell.Value.y;
-            var cell = editorData.CurrentConfig.board.GetCell(x, y);
-            
-            cell.cellType = BoardCellType.Void;
-
-            var piecesToRemove = new System.Collections.Generic.List<PieceData>();
-            foreach (var piece in editorData.CurrentConfig.pieces)
-            {
-                if (piece.position.x == x && piece.position.y == y)
-                    piecesToRemove.Add(piece);
-            }
-            
-            foreach (var piece in piecesToRemove)
-            {
-                editorData.CurrentConfig.pieces.Remove(piece);
-                if (SelectedPiece == piece)
-                    SelectedPiece = null;
-            }
-
-            Debug.Log($"Deleted cell at ({x}, {y}) and {piecesToRemove.Count} piece(s)");
-        }
-
-        private void DeleteSelectedPiece()
-        {
-            if (SelectedPiece == null)
-                return;
-
-            editorData.RecordUndo();
-            editorData.CurrentConfig.pieces.Remove(SelectedPiece);
-            
-            Debug.Log($"Deleted piece: {SelectedPiece.id}");
-            SelectedPiece = null;
-        }
-
-        public void FillBoard(BoardCellType cellType)
-        {
-            var board = editorData.CurrentConfig.board;
-            for (var y = 0; y < board.height; y++)
-            {
-                for (var x = 0; x < board.width; x++)
-                {
-                    board.GetCell(x, y).cellType = cellType;
-                }
+                var candidate = $"{prefix}_{index:D3}";
+                var exists = editorData.CurrentConfig.pieces.Exists(piece => piece.id == candidate);
+                if (!exists)
+                    return candidate;
+                index++;
             }
         }
 

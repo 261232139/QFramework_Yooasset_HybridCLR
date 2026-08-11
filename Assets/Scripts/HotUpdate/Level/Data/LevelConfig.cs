@@ -63,9 +63,9 @@ namespace Game.Level.Data
                     return false;
                 }
 
-                if (!board.IsPlayable(piece.position.x, piece.position.y))
+                if (!board.HasCell(piece.position.x, piece.position.y))
                 {
-                    error = $"Piece {piece.id} is on a non-playable cell at {piece.position}.";
+                    error = $"Piece {piece.id} is not on a board cell at {piece.position}.";
                     return false;
                 }
 

@@ -7,8 +7,6 @@ namespace Game.Level.Editor
     [Serializable]
     public class GenerationConstraints
     {
-        public int minPlayableCells = 10;
-        public int maxPlayableCells = 63;
         public int minPieceCount = 3;
         public int maxPieceCount = 20;
         public float movablePieceRatio = 0.3f;

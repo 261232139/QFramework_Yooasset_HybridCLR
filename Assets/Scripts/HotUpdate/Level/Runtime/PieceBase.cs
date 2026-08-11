@@ -57,9 +57,8 @@ namespace Game.Level.Runtime
             if (!board.IsInBounds(to))
                 return MoveResult.Fail("目标位置超出棋盘范围");
 
-            // 检查目标位置是否可玩
-            if (!board.IsPlayable(to))
-                return MoveResult.Fail("目标位置不可用");
+            if (!board.HasCell(to))
+                return MoveResult.Fail("目标位置没有格子");
 
             // 检查目标位置是否已有棋子
             if (board.HasPieceAt(to))

@@ -73,7 +73,7 @@ namespace Game.Level.Runtime
             {
                 for (var x = 0; x < config.board.width; x++)
                 {
-                    if (!config.board.IsPlayable(x, y))
+                    if (!config.board.HasCell(x, y))
                         continue;
 
                     var position = new GridPosition(x, y);

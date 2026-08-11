@@ -110,7 +110,7 @@ namespace Game.Level.Editor
                 var row = new BoardRowData { cells = new List<BoardCellData>() };
                 for (var x = 0; x < board.width; x++)
                 {
-                    row.cells.Add(new BoardCellData { cellType = BoardCellType.Playable });
+                    row.cells.Add(null);
                 }
                 board.rows.Add(row);
             }

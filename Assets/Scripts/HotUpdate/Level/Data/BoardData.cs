@@ -3,18 +3,9 @@ using System.Collections.Generic;
 
 namespace Game.Level.Data
 {
-    public enum BoardCellType
-    {
-        Void = 0,
-        Playable = 1,
-    }
-
     [Serializable]
     public class BoardCellData
     {
-        public BoardCellType cellType = BoardCellType.Void;
-
-        public bool IsPlayable => cellType == BoardCellType.Playable;
     }
 
     [Serializable]
@@ -40,7 +31,7 @@ namespace Game.Level.Data
             return rows[y].cells[x];
         }
 
-        public bool IsPlayable(int x, int y) => GetCell(x, y)?.IsPlayable == true;
+        public bool HasCell(int x, int y) => GetCell(x, y) != null;
 
         public bool Validate(out string error)
         {
@@ -56,7 +47,7 @@ namespace Game.Level.Data
                 return false;
             }
 
-            var playableCellCount = 0;
+            var cellCount = 0;
             for (var y = 0; y < height; y++)
             {
                 var row = rows[y];
@@ -68,20 +59,14 @@ namespace Game.Level.Data
 
                 for (var x = 0; x < width; x++)
                 {
-                    if (row.cells[x] == null)
-                    {
-                        error = $"Board cell ({x}, {y}) cannot be null.";
-                        return false;
-                    }
-
-                    if (row.cells[x].IsPlayable)
-                        playableCellCount++;
+                    if (row.cells[x] != null)
+                        cellCount++;
                 }
             }
 
-            if (playableCellCount == 0)
+            if (cellCount == 0)
             {
-                error = "Board must contain at least one playable cell.";
+                error = "Board must contain at least one cell.";
                 return false;
             }
 

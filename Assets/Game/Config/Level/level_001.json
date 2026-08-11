@@ -9,97 +9,47 @@
         "rows": [
             {
                 "cells": [
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 1
-                    }
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
                 ]
             },
             {
                 "cells": [
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 0
-                    }
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
                 ]
             },
             {
                 "cells": [
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 0
-                    }
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
                 ]
             },
             {
                 "cells": [
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    }
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
                 ]
             },
             {
                 "cells": [
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 0
-                    },
-                    {
-                        "cellType": 1
-                    },
-                    {
-                        "cellType": 1
-                    }
+                    {},
+                    {},
+                    {},
+                    {},
+                    {}
                 ]
             }
         ]

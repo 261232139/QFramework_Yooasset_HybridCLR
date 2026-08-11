@@ -51,29 +51,12 @@ namespace Game.Level.Editor
                 rows = new List<BoardRowData>()
             };
 
-            var targetPlayableCells = Random.Range(
-                Mathf.Max(request.constraints.minPlayableCells, request.targetWidth * request.targetHeight / 2),
-                Mathf.Min(request.constraints.maxPlayableCells, request.targetWidth * request.targetHeight)
-            );
-
             for (var y = 0; y < board.height; y++)
             {
                 var row = new BoardRowData { cells = new List<BoardCellData>() };
                 for (var x = 0; x < board.width; x++)
-                {
-                    var cell = new BoardCellData
-                    {
-                        cellType = Random.value > 0.3f ? BoardCellType.Playable : BoardCellType.Void
-                    };
-                    row.cells.Add(cell);
-                }
+                    row.cells.Add(new BoardCellData());
                 board.rows.Add(row);
-            }
-
-            var playableCount = CountPlayableCells(board);
-            if (playableCount < request.constraints.minPlayableCells)
-            {
-                FillRandomCells(board, request.constraints.minPlayableCells - playableCount);
             }
 
             return board;
@@ -81,84 +64,39 @@ namespace Game.Level.Editor
 
         private void GeneratePieces(LevelConfig config, LevelGenerationRequest request)
         {
-            var playablePositions = GetPlayablePositions(config.board);
-            if (playablePositions.Count == 0)
-                return;
-
+            var availablePositions = GetBoardPositions(config.board);
             var pieceCount = Mathf.Min(
                 Random.Range(request.constraints.minPieceCount, request.constraints.maxPieceCount + 1),
-                playablePositions.Count
+                availablePositions.Count
             );
-
             var movableCount = Mathf.Max(1, Mathf.RoundToInt(pieceCount * request.constraints.movablePieceRatio));
             var usedPositions = new HashSet<GridPosition>();
 
             for (var i = 0; i < pieceCount; i++)
             {
-                var position = GetRandomUnusedPosition(playablePositions, usedPositions);
+                var position = GetRandomUnusedPosition(availablePositions, usedPositions);
                 if (!position.HasValue)
                     break;
 
                 var pieceType = GetRandomPieceType(request.constraints.pieceTypeDistribution);
-                var piece = new PieceData
+                config.pieces.Add(new PieceData
                 {
                     id = $"{pieceType.ToString().ToLower()}_{i:D3}",
                     pieceType = pieceType,
                     isMovable = i < movableCount,
                     position = position.Value
-                };
-
-                config.pieces.Add(piece);
+                });
                 usedPositions.Add(position.Value);
             }
         }
 
-        private int CountPlayableCells(BoardData board)
+        private List<GridPosition> GetBoardPositions(BoardData board)
         {
-            var count = 0;
+            var positions = new List<GridPosition>(board.width * board.height);
             for (var y = 0; y < board.height; y++)
             {
                 for (var x = 0; x < board.width; x++)
-                {
-                    if (board.IsPlayable(x, y))
-                        count++;
-                }
-            }
-            return count;
-        }
-
-        private void FillRandomCells(BoardData board, int count)
-        {
-            var filled = 0;
-            var attempts = 0;
-            var maxAttempts = board.width * board.height * 2;
-
-            while (filled < count && attempts < maxAttempts)
-            {
-                var x = Random.Range(0, board.width);
-                var y = Random.Range(0, board.height);
-                var cell = board.GetCell(x, y);
-
-                if (cell != null && !cell.IsPlayable)
-                {
-                    cell.cellType = BoardCellType.Playable;
-                    filled++;
-                }
-
-                attempts++;
-            }
-        }
-
-        private List<GridPosition> GetPlayablePositions(BoardData board)
-        {
-            var positions = new List<GridPosition>();
-            for (var y = 0; y < board.height; y++)
-            {
-                for (var x = 0; x < board.width; x++)
-                {
-                    if (board.IsPlayable(x, y))
-                        positions.Add(new GridPosition(x, y));
-                }
+                    positions.Add(new GridPosition(x, y));
             }
             return positions;
         }
@@ -166,10 +104,10 @@ namespace Game.Level.Editor
         private GridPosition? GetRandomUnusedPosition(List<GridPosition> positions, HashSet<GridPosition> used)
         {
             var available = new List<GridPosition>();
-            foreach (var pos in positions)
+            foreach (var position in positions)
             {
-                if (!used.Contains(pos))
-                    available.Add(pos);
+                if (!used.Contains(position))
+                    available.Add(position);
             }
 
             return available.Count > 0 ? available[Random.Range(0, available.Count)] : (GridPosition?)null;
@@ -183,12 +121,11 @@ namespace Game.Level.Editor
 
             var random = Random.Range(0, totalWeight);
             var cumulative = 0;
-
-            foreach (var kvp in distribution)
+            foreach (var entry in distribution)
             {
-                cumulative += kvp.Value;
+                cumulative += entry.Value;
                 if (random < cumulative)
-                    return kvp.Key;
+                    return entry.Key;
             }
 
             return PieceType.Peg;
