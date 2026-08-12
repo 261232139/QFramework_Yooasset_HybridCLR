@@ -11,11 +11,18 @@ namespace Game.Level.Editor
         private float cellDisplaySize = 40f;
         private const float MinCellSize = 20f;
         private const float MaxCellSize = 80f;
+        private static readonly Color EditorEmptyCellColor = new Color(0.31f, 0.31f, 0.31f);
+        private static readonly Color EditorEmptyCellHoverColor = new Color(0.40f, 0.40f, 0.40f);
+        private static readonly Color BoardCellColor = new Color(0.30f, 0.65f, 0.45f);
+        private static readonly Color BoardCellHoverColor = new Color(0.42f, 0.78f, 0.57f);
+        private static readonly Color SelectedEmptyCellColor = new Color(0.95f, 0.72f, 0.28f);
+        private static readonly Color SelectedBoardCellColor = new Color(0.25f, 0.62f, 1f);
 
         public GridPosition? SelectedCell { get; private set; }
         public PieceData SelectedPiece { get; private set; }
         public PieceType SelectedPieceType { get; set; } = PieceType.Peg;
         public bool NewPieceMovable { get; set; } = true;
+        public bool HasSelectedCell => SelectedCell.HasValue;
         public bool HasSelectedBoardCell => SelectedCell.HasValue &&
                                             editorData.CurrentConfig.board.HasCell(
                                                 SelectedCell.Value.x,
@@ -83,22 +90,18 @@ namespace Game.Level.Editor
             var isSelected = SelectedCell.HasValue && SelectedCell.Value.Equals(position);
             var isHovered = rect.Contains(Event.current.mousePosition);
 
-            Color color;
-            if (!hasCell)
-                color = isHovered ? new Color(0.35f, 0.35f, 0.35f) : new Color(0.25f, 0.25f, 0.25f);
-            else if (isSelected)
-                color = new Color(0.3f, 0.7f, 1f);
-            else
-                color = isHovered ? new Color(0.9f, 0.9f, 0.9f) : Color.white;
+            var color = hasCell
+                ? (isSelected ? SelectedBoardCellColor : isHovered ? BoardCellHoverColor : BoardCellColor)
+                : (isSelected ? SelectedEmptyCellColor : isHovered ? EditorEmptyCellHoverColor : EditorEmptyCellColor);
 
             EditorGUI.DrawRect(rect, color);
 
-            if (hasCell && cellDisplaySize > 25f)
+            if (cellDisplaySize > 25f)
             {
                 var labelStyle = new GUIStyle(EditorStyles.miniLabel)
                 {
                     alignment = TextAnchor.MiddleCenter,
-                    normal = { textColor = Color.black }
+                    normal = { textColor = hasCell ? Color.black : Color.white }
                 };
                 GUI.Label(rect, $"{x},{y}", labelStyle);
             }
@@ -149,9 +152,7 @@ namespace Game.Level.Editor
                     if (board.IsInside(cellX, cellY))
                     {
                         if (e.button == 0)
-                            HandleLeftClick(cellX, cellY);
-                        else if (e.button == 1)
-                            HandleRightClick(cellX, cellY);
+                            SelectCell(cellX, cellY);
                         e.Use();
                     }
                 }
@@ -166,35 +167,49 @@ namespace Game.Level.Editor
             }
         }
 
-        private void HandleLeftClick(int x, int y)
+        private void SelectCell(int x, int y)
         {
-            var board = editorData.CurrentConfig.board;
-            if (!board.HasCell(x, y))
-            {
-                editorData.RecordUndo();
-                board.rows[y].cells[x] = new BoardCellData();
-            }
-
             SelectedCell = new GridPosition(x, y);
             SelectedPiece = FindPieceAt(x, y);
         }
 
-        private void HandleRightClick(int x, int y)
+        public void AddCellAtSelectedPosition()
         {
+            if (!SelectedCell.HasValue || HasSelectedBoardCell)
+                return;
+
             var board = editorData.CurrentConfig.board;
-            if (!board.HasCell(x, y))
+            var position = SelectedCell.Value;
+            if (!board.IsInside(position.x, position.y))
                 return;
 
             editorData.RecordUndo();
-            var removedPiece = FindPieceAt(x, y);
+            var cell = board.rows[position.y].cells[position.x];
+            if (cell == null)
+                board.rows[position.y].cells[position.x] = new BoardCellData { isActive = true };
+            else
+                cell.isActive = true;
+            SelectedPiece = null;
+        }
+
+        public void RemoveSelectedCell()
+        {
+            if (!HasSelectedBoardCell)
+                return;
+
+            var position = SelectedCell.Value;
+            editorData.RecordUndo();
+
+            var removedPiece = FindPieceAt(position.x, position.y);
             if (removedPiece != null)
                 editorData.CurrentConfig.pieces.Remove(removedPiece);
-            board.rows[y].cells[x] = null;
+            var cell = editorData.CurrentConfig.board.rows[position.y].cells[position.x];
+            if (cell == null)
+                editorData.CurrentConfig.board.rows[position.y].cells[position.x] = new BoardCellData { isActive = false };
+            else
+                cell.isActive = false;
 
-            if (SelectedCell.HasValue && SelectedCell.Value.Equals(new GridPosition(x, y)))
-                ClearSelection();
-            else if (SelectedPiece == removedPiece)
-                SelectedPiece = null;
+            SelectedPiece = null;
         }
 
         public void AddPieceToSelectedCell()

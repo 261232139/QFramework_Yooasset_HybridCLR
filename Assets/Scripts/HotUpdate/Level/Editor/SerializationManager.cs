@@ -80,5 +80,6 @@ namespace Game.Level.Editor
 
         public static string GetFullPath(string fileName) => Path.Combine(ConfigPath, $"{fileName}.json");
         public static bool Exists(string fileName) => File.Exists(GetFullPath(fileName));
+
     }
 }

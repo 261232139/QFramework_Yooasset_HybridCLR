@@ -76,7 +76,7 @@ namespace Game.Level.Runtime
             goalManager.Initialize(controller.BoardState);
 
             // 2. Board 只负责布局
-            board.BuildLayout(config);
+            board.BuildLayout(config, controller.BoardState);
 
             // 3. 初始化各个组件
             InitializeManagers();
@@ -103,6 +103,8 @@ namespace Game.Level.Runtime
 
             // 开始跟踪目标
             controller.GoalManager.StartTracking();
+
+            CheckGameOver();
 
             // 更新 UI
             if (uiController != null)
@@ -242,7 +244,12 @@ namespace Game.Level.Runtime
             if (inputHandler != null)
             {
                 inputHandler.Initialize(this, board);
+                inputHandler.OnMoveRequested -= HandleMoveRequested;
+                inputHandler.OnPieceSelected -= HandlePieceSelected;
+                inputHandler.OnPieceDeselected -= HandlePieceDeselected;
                 inputHandler.OnMoveRequested += HandleMoveRequested;
+                inputHandler.OnPieceSelected += HandlePieceSelected;
+                inputHandler.OnPieceDeselected += HandlePieceDeselected;
             }
 
             // 订阅目标事件
@@ -300,31 +307,37 @@ namespace Game.Level.Runtime
             if (!isPlaying || controller == null)
                 return;
 
-            if (controller.CheckGameOver())
+            if (controller.IsVictory())
             {
-                Debug.Log("[LevelView] No more valid moves!");
-
-                if (controller.IsGoalCompleted())
-                {
-                    CompleteLevel();
-                }
-                else
-                {
-                    FailLevel();
-                }
+                CompleteLevel();
+            }
+            else if (controller.IsDefeat())
+            {
+                Debug.Log("[LevelView] No valid jump moves remain.");
+                FailLevel();
             }
         }
 
         private void HandleGoalCompleted()
         {
-            Debug.Log("[LevelView] Goal completed!");
-            CompleteLevel();
+            CheckGameOver();
         }
 
         private void HandleGoalFailed()
         {
-            Debug.Log("[LevelView] Goal failed!");
-            FailLevel();
+            CheckGameOver();
+        }
+
+        private void HandlePieceSelected(IPiece piece)
+        {
+            board?.SetPieceSelected(piece, true);
+            board?.ShowMoveableEffects(piece, BoardState);
+        }
+
+        private void HandlePieceDeselected()
+        {
+            board?.RefreshPieceStates();
+            board?.HideMoveableEffects();
         }
 
         #endregion

@@ -26,6 +26,9 @@ namespace Game.Level.Editor
         private void DrawPieceTools()
         {
             GUILayout.Label("Piece Tools", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                "Grid colors: gray = editor-only empty position; green = board cell; orange/blue = selected position.",
+                MessageType.None);
             boardView.SelectedPieceType = (PieceType)EditorGUILayout.EnumPopup("Type", boardView.SelectedPieceType);
             boardView.NewPieceMovable = EditorGUILayout.Toggle("Movable", boardView.NewPieceMovable);
 
@@ -71,15 +74,15 @@ namespace Game.Level.Editor
 
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox(
-                "Tips:\n• Left-click blank position to create a cell\n• Left-click cell to select it\n• Right-click cell to delete cell and piece\n• Movable off means fixed piece",
+                "Tips:\n• Left-click any grid position to select it\n• Select a blank position, then click Add Cell\n• Select a cell, then click Delete Cell\n• Deleting a cell also deletes its piece\n• Movable off means fixed piece",
                 MessageType.Info);
         }
 
         private void DrawSelectedCellTools()
         {
-            if (!boardView.HasSelectedBoardCell)
+            if (!boardView.HasSelectedCell)
             {
-                EditorGUILayout.HelpBox("Select a board cell to edit its piece.", MessageType.Info);
+                EditorGUILayout.HelpBox("Select a grid position to edit the board.", MessageType.Info);
                 return;
             }
 
@@ -87,6 +90,23 @@ namespace Game.Level.Editor
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("Position", boardView.SelectedCell.Value.ToString());
 
+            if (!boardView.HasSelectedBoardCell)
+            {
+                EditorGUILayout.HelpBox("This is a blank position.", MessageType.Info);
+                if (GUILayout.Button("Add Cell"))
+                    boardView.AddCellAtSelectedPosition();
+
+                EditorGUILayout.EndVertical();
+                return;
+            }
+
+            var originalColor = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(1f, 0.6f, 0.6f);
+            if (GUILayout.Button("Delete Cell"))
+                boardView.RemoveSelectedCell();
+            GUI.backgroundColor = originalColor;
+
+            EditorGUILayout.Space(4);
             if (boardView.SelectedPiece == null)
             {
                 if (GUILayout.Button("Add Piece"))
@@ -103,7 +123,6 @@ namespace Game.Level.Editor
                 if (EditorGUI.EndChangeCheck())
                     editorData.IsDirty = true;
 
-                var originalColor = GUI.backgroundColor;
                 GUI.backgroundColor = new Color(1f, 0.5f, 0.5f);
                 if (GUILayout.Button("Remove Piece"))
                     boardView.RemovePieceFromSelectedCell();

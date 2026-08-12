@@ -89,12 +89,18 @@ namespace Game.Level.Runtime
             return MoveExecutionResult.CreateSuccess(piece, from, to, jumpedPiece);
         }
 
-        /// <summary>
-        /// 检查游戏是否结束
-        /// </summary>
-        public bool CheckGameOver()
+        /// <summary>棋盘只剩一个棋子时获胜。</summary>
+        public bool IsVictory()
         {
-            return !boardState.HasMovablePieces();
+            return boardState.AllPieces.Count == 1;
+        }
+
+        /// <summary>
+        /// 除胜利外，棋盘上不存在任何合法跳跃移动时失败。
+        /// </summary>
+        public bool IsDefeat()
+        {
+            return !IsVictory() && !boardState.HasMovablePieces();
         }
 
         /// <summary>

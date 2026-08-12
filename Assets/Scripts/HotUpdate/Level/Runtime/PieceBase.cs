@@ -46,9 +46,15 @@ namespace Game.Level.Runtime
         /// </summary>
         public virtual MoveResult ValidateMove(GridPosition from, GridPosition to, IBoardState board)
         {
+            if (board == null)
+                return MoveResult.Fail("棋盘状态不存在");
+
             // 基础检查
             if (!IsMovable)
                 return MoveResult.Fail("棋子不可移动");
+
+            if (!from.Equals(Position) || board.GetPieceAt(from) != this)
+                return MoveResult.Fail("起点不存在该棋子");
 
             if (from.Equals(to))
                 return MoveResult.Fail("起点和终点相同");
@@ -100,6 +106,9 @@ namespace Game.Level.Runtime
 
             // 获取中间位置（被跨越的棋子位置）
             var middlePosition = GetMiddlePosition(from, to, direction);
+
+            if (!board.HasCell(middlePosition))
+                return MoveResult.Fail("移动路径中间没有有效格子");
 
             // 中间位置必须有棋子
             if (!board.HasPieceAt(middlePosition))

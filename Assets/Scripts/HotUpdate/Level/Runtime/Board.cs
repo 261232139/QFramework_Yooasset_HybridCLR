@@ -15,15 +15,16 @@ namespace Game.Level.Runtime
         [SerializeField] private Vector2 cellSpacing = new Vector2(10f, 10f);
 
         [Header("Piece Prefabs")]
-        [SerializeField] private GameObject pegPiecePrefab;
-        [SerializeField] private GameObject gemPiecePrefab;
-        [SerializeField] private GameObject stonePiecePrefab;
+        [SerializeField] private NormalPieceView pegPiecePrefab;
+        [SerializeField] private NormalPieceView gemPiecePrefab;
+        [SerializeField] private NormalPieceView stonePiecePrefab;
 
         private readonly List<MapGrid> generatedGrids = new List<MapGrid>();
         private readonly Dictionary<GridPosition, MapGrid> gridsByPosition = new Dictionary<GridPosition, MapGrid>();
         private readonly Dictionary<string, GameObject> pieceObjects = new Dictionary<string, GameObject>();
         
         private LevelConfig currentConfig;
+        private BoardStateManager boardState;
 
         public LevelConfig CurrentConfig => currentConfig;
         public Vector2 CellSize => cellSize;
@@ -39,7 +40,7 @@ namespace Game.Level.Runtime
         /// <summary>
         /// 构建棋盘布局（只负责视觉呈现）
         /// </summary>
-        public void BuildLayout(LevelConfig config)
+        public void BuildLayout(LevelConfig config, BoardStateManager runtimeBoardState)
         {
             if (config == null)
             {
@@ -63,10 +64,13 @@ namespace Game.Level.Runtime
             ClearGeneratedGrids();
             
             currentConfig = config;
+            boardState = runtimeBoardState;
 
             var piecesByPosition = new Dictionary<GridPosition, PieceData>();
             foreach (var piece in config.pieces)
+            {
                 piecesByPosition.Add(piece.position, piece);
+            }
 
             // 生成棋盘格子
             for (var y = 0; y < config.board.height; y++)
@@ -77,11 +81,9 @@ namespace Game.Level.Runtime
                         continue;
 
                     var position = new GridPosition(x, y);
-                    piecesByPosition.TryGetValue(position, out var piece);
-
                     var grid = Instantiate(mapGridTemplate, transform);
                     grid.GetComponent<RectTransform>().anchoredPosition = GetAnchoredPosition(position, config.board);
-                    grid.Initialize(position, piece);
+                    grid.Initialize(position);
                     grid.gameObject.SetActive(true);
 
                     generatedGrids.Add(grid);
@@ -120,7 +122,8 @@ namespace Game.Level.Runtime
             // 在对应的MapGrid上创建棋子
             if (gridsByPosition.TryGetValue(pieceData.position, out var grid))
             {
-                var pieceObj = Instantiate(prefab, grid.transform);
+                var pieceView = Instantiate(prefab, grid.transform);
+                var pieceObj = pieceView.gameObject;
                 pieceObj.name = $"{pieceData.pieceType}_{pieceData.id}";
                 
                 var rectTransform = pieceObj.GetComponent<RectTransform>();
@@ -131,12 +134,14 @@ namespace Game.Level.Runtime
                 }
 
                 pieceObjects[pieceData.id] = pieceObj;
+
+                pieceView.Initialize(GetRuntimePiece(pieceData.id));
                 grid.SetPieceObject(pieceObj);
             }
         }
 
         /// <summary>根据棋子类型获取预制体</summary>
-        private GameObject GetPiecePrefab(PieceType type)
+        private NormalPieceView GetPiecePrefab(PieceType type)
         {
             switch (type)
             {
@@ -216,6 +221,72 @@ namespace Game.Level.Runtime
 
         public bool TryGetGrid(GridPosition position, out MapGrid grid) => gridsByPosition.TryGetValue(position, out grid);
 
+        public void SetPieceSelected(IPiece piece, bool selected)
+        {
+            if (piece != null && pieceObjects.TryGetValue(piece.Id, out var pieceObject))
+            {
+                var pieceView = pieceObject.GetComponent<PieceViewBase>();
+                if (pieceView != null)
+                    pieceView.SetSelected(selected);
+            }
+        }
+
+        public void RefreshPieceStates()
+        {
+            foreach (var pieceObject in pieceObjects.Values)
+            {
+                if (pieceObject == null)
+                    continue;
+
+                var pieceView = pieceObject.GetComponent<PieceViewBase>();
+                if (pieceView != null)
+                    pieceView.RefreshState();
+            }
+        }
+
+        public void ShowMoveableEffects(IPiece piece, IBoardState boardState)
+        {
+            HideMoveableEffects();
+            if (piece == null || !piece.IsMovable || boardState == null)
+                return;
+
+            var offsets = new[]
+            {
+                new GridPosition(0, -2), new GridPosition(0, 2),
+                new GridPosition(-2, 0), new GridPosition(2, 0)
+            };
+
+            foreach (var offset in offsets)
+            {
+                var target = new GridPosition(piece.Position.x + offset.x, piece.Position.y + offset.y);
+                if (piece.ValidateMove(piece.Position, target, boardState).IsValid &&
+                    gridsByPosition.TryGetValue(target, out var grid))
+                {
+                    grid.SetMoveableEffect(true);
+                }
+            }
+        }
+
+        public void HideMoveableEffects()
+        {
+            foreach (var grid in generatedGrids)
+                grid.SetMoveableEffect(false);
+        }
+
+        private IPiece GetRuntimePiece(string pieceId)
+        {
+            if (boardState == null)
+                return null;
+
+            foreach (var piece in boardState.AllPieces)
+            {
+                if (piece.Id == pieceId)
+                    return piece;
+            }
+
+            return null;
+        }
+
         private Vector2 GetAnchoredPosition(GridPosition position, BoardData board)
         {
             var step = cellSize + cellSpacing;
@@ -258,8 +329,10 @@ namespace Game.Level.Runtime
                 }
             }
             pieceObjects.Clear();
+            HideMoveableEffects();
             
             currentConfig = null;
+            boardState = null;
         }
     }
 }

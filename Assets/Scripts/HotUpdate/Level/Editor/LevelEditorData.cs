@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Game.Level.Data;
-using UnityEngine;
 
 namespace Game.Level.Editor
 {
@@ -110,7 +109,7 @@ namespace Game.Level.Editor
                 var row = new BoardRowData { cells = new List<BoardCellData>() };
                 for (var x = 0; x < board.width; x++)
                 {
-                    row.cells.Add(null);
+                    row.cells.Add(new BoardCellData { isActive = false });
                 }
                 board.rows.Add(row);
             }
@@ -120,8 +119,77 @@ namespace Game.Level.Editor
 
         private LevelConfig CloneConfig(LevelConfig source)
         {
-            var json = JsonUtility.ToJson(source);
-            return JsonUtility.FromJson<LevelConfig>(json);
+            var clone = new LevelConfig
+            {
+                schemaVersion = source.schemaVersion,
+                levelId = source.levelId,
+                sceneType = source.sceneType,
+                difficulty = source.difficulty,
+                board = CloneBoard(source.board),
+                pieces = ClonePieces(source.pieces)
+            };
+
+            return clone;
+        }
+
+        private static BoardData CloneBoard(BoardData source)
+        {
+            if (source == null)
+                return null;
+
+            var clone = new BoardData
+            {
+                width = source.width,
+                height = source.height,
+                rows = new List<BoardRowData>()
+            };
+
+            foreach (var sourceRow in source.rows)
+            {
+                if (sourceRow == null)
+                {
+                    clone.rows.Add(null);
+                    continue;
+                }
+
+                var clonedRow = new BoardRowData { cells = new List<BoardCellData>() };
+                foreach (var sourceCell in sourceRow.cells)
+                {
+                    clonedRow.cells.Add(sourceCell == null
+                        ? new BoardCellData { isActive = false }
+                        : new BoardCellData { isActive = sourceCell.isActive });
+                }
+
+                clone.rows.Add(clonedRow);
+            }
+
+            return clone;
+        }
+
+        private static List<PieceData> ClonePieces(List<PieceData> source)
+        {
+            if (source == null)
+                return null;
+
+            var clone = new List<PieceData>(source.Count);
+            foreach (var sourcePiece in source)
+            {
+                if (sourcePiece == null)
+                {
+                    clone.Add(null);
+                    continue;
+                }
+
+                clone.Add(new PieceData
+                {
+                    id = sourcePiece.id,
+                    pieceType = sourcePiece.pieceType,
+                    isMovable = sourcePiece.isMovable,
+                    position = sourcePiece.position
+                });
+            }
+
+            return clone;
         }
     }
 }

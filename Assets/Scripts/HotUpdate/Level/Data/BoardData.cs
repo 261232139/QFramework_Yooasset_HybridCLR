@@ -6,6 +6,7 @@ namespace Game.Level.Data
     [Serializable]
     public class BoardCellData
     {
+        public bool isActive = true;
     }
 
     [Serializable]
@@ -31,7 +32,7 @@ namespace Game.Level.Data
             return rows[y].cells[x];
         }
 
-        public bool HasCell(int x, int y) => GetCell(x, y) != null;
+        public bool HasCell(int x, int y) => GetCell(x, y)?.isActive == true;
 
         public bool Validate(out string error)
         {
@@ -59,7 +60,7 @@ namespace Game.Level.Data
 
                 for (var x = 0; x < width; x++)
                 {
-                    if (row.cells[x] != null)
+                    if (row.cells[x]?.isActive == true)
                         cellCount++;
                 }
             }

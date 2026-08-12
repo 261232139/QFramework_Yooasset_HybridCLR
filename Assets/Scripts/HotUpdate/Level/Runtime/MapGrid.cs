@@ -3,55 +3,45 @@ using UnityEngine;
 
 namespace Game.Level.Runtime
 {
-    /// <summary>Visual representation of one playable board cell.</summary>
+    /// <summary>单个有效棋盘格的视图，只管理格子本身及可落点特效。</summary>
     public class MapGrid : MonoBehaviour
     {
         [SerializeField] private GameObject node;
-        [SerializeField] private GameObject arrow;
+        [SerializeField] private GameObject moveableEffect;
         [SerializeField] private Transform pieceContainer;
 
         public GridPosition Position { get; private set; }
-        public PieceData Piece { get; private set; }
         public GameObject PieceObject => currentPieceObject;
-        
+
         private GameObject currentPieceObject;
 
         private void Awake() => BindReferences();
 
-        public void Initialize(GridPosition position, PieceData piece)
+        public void Initialize(GridPosition position)
         {
             BindReferences();
-
             Position = position;
-            Piece = piece;
             gameObject.name = $"MapGrid ({position.x}, {position.y})";
 
-            var hasPiece = piece != null;
             if (node != null)
-                node.SetActive(hasPiece);
+                node.SetActive(true);
 
-            if (arrow != null)
-                arrow.SetActive(hasPiece && piece.isMovable);
+            SetMoveableEffect(false);
         }
 
-        /// <summary>设置当前格子上的棋子对象</summary>
         public void SetPieceObject(GameObject pieceObj)
         {
             currentPieceObject = pieceObj;
-            
-            // 更新 node 和 arrow 的可见性
-            var hasPiece = pieceObj != null;
             if (node != null)
-                node.SetActive(hasPiece);
-                
-            if (arrow != null && Piece != null)
-                arrow.SetActive(hasPiece && Piece.isMovable);
+                node.SetActive(true);
         }
 
-        /// <summary>获取当前格子上的棋子对象</summary>
-        public GameObject GetPieceObject() => currentPieceObject;
+        public void SetMoveableEffect(bool visible)
+        {
+            if (moveableEffect != null)
+                moveableEffect.SetActive(visible);
+        }
 
-        /// <summary>检查格子是否有棋子</summary>
         public bool HasPiece() => currentPieceObject != null;
 
         private void BindReferences()
@@ -63,20 +53,17 @@ namespace Game.Level.Runtime
                     node = nodeTransform.gameObject;
             }
 
-            if (arrow == null && node != null)
+            if (moveableEffect == null && node != null)
             {
-                var arrowTransform = node.transform.Find("Arrow");
-                if (arrowTransform != null)
-                    arrow = arrowTransform.gameObject;
+                var effectTransform = node.transform.Find("GridIcon/MoveableEffect");
+                if (effectTransform != null)
+                    moveableEffect = effectTransform.gameObject;
             }
 
             if (pieceContainer == null)
             {
-                var containerTransform = transform.Find("PieceContainer");
-                if (containerTransform != null)
-                    pieceContainer = containerTransform;
-                else
-                    pieceContainer = transform;
+                var containerTransform = transform.Find("Node/GridIcon/PieceContainer");
+                pieceContainer = containerTransform != null ? containerTransform : transform;
             }
         }
     }

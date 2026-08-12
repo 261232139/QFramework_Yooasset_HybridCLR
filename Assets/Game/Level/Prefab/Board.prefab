@@ -92,9 +92,9 @@ MonoBehaviour:
   mapGridTemplate: {fileID: 1234567890123456789, guid: a42666e5561f35b4aa1a9bcdd4ceafff, type: 3}
   cellSize: {x: 150, y: 150}
   cellSpacing: {x: 10, y: 10}
-  pegPiecePrefab: {fileID: 1588799342537807472, guid: 7042421ca14a8294d83170b15662be9d, type: 3}
-  gemPiecePrefab: {fileID: 1588799342537807472, guid: 3e9bed99d4f27164389b6fa10eb00a4b, type: 3}
-  stonePiecePrefab: {fileID: 1588799342537807472, guid: 3e9bed99d4f27164389b6fa10eb00a4b, type: 3}
+  pegPiecePrefab: {fileID: 4740439452755852128, guid: 7042421ca14a8294d83170b15662be9d, type: 3}
+  gemPiecePrefab: {fileID: 8165990352186242559, guid: 3e9bed99d4f27164389b6fa10eb00a4b, type: 3}
+  stonePiecePrefab: {fileID: 8165990352186242559, guid: 3e9bed99d4f27164389b6fa10eb00a4b, type: 3}
 --- !u!1001 &5460121885258592266
 PrefabInstance:
   m_ObjectHideFlags: 0

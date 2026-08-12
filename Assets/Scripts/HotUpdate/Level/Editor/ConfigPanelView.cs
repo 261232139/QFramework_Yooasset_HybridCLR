@@ -100,7 +100,7 @@ namespace Game.Level.Editor
             {
                 var row = new BoardRowData { cells = new System.Collections.Generic.List<BoardCellData>() };
                 for (var x = 0; x < newWidth; x++)
-                    row.cells.Add(null);
+                    row.cells.Add(new BoardCellData { isActive = false });
                 board.rows.Add(row);
             }
 
@@ -111,7 +111,7 @@ namespace Game.Level.Editor
             {
                 var row = board.rows[y];
                 for (var x = row.cells.Count; x < newWidth; x++)
-                    row.cells.Add(null);
+                    row.cells.Add(new BoardCellData { isActive = false });
 
                 while (row.cells.Count > newWidth)
                     row.cells.RemoveAt(row.cells.Count - 1);

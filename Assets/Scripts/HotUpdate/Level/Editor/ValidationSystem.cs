@@ -84,7 +84,7 @@ namespace Game.Level.Editor
 
                 for (var x = 0; x < board.width; x++)
                 {
-                    if (row.cells[x] != null)
+                    if (row.cells[x]?.isActive == true)
                         cellCount++;
                 }
             }
