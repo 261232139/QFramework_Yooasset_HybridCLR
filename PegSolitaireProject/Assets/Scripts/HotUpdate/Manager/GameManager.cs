@@ -11,6 +11,7 @@
 
 using UnityEngine;
 using QFramework;
+using Game.Config;
 using HotUpdate.LocalStorageKit;
 
 namespace HotUpdate.Game
@@ -50,11 +51,17 @@ namespace HotUpdate.Game
 
         private void InitializeModules()
         {
+            InitializeConfigSystem();
             InitializeStorageSystem();
             InitializeGameSettings();
             InitializePlayerData();
         }
 
+        private void InitializeConfigSystem()
+        {
+            ConfigManager.Instance.Initialize();
+            Debug.Log("[GameManager] 配置系统初始化完成");
+        }
         private void InitializeStorageSystem()
         {
             var saveManager = SaveManager.Instance;

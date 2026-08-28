@@ -56,6 +56,19 @@ MonoBehaviour:
         FilterRuleName: CollectAll
         AssetTags: 
         UserData: 
+    - GroupName: LubanConfig
+      GroupDesc: Luban generated binary configuration files
+      AssetTags:
+      ActiveRuleName: EnableGroup
+      Collectors:
+      - CollectPath: Assets/Game/Config/Data
+        CollectorGUID: 6e0dfc3e915a4e2fb796a7e0d1dfe0bd
+        CollectorType: 0
+        AddressRuleName: AddressByFileName
+        PackRuleName: PackDirectory
+        FilterRuleName: CollectAll
+        AssetTags:
+        UserData:
     - GroupName: Level
       GroupDesc: 
       AssetTags: 
