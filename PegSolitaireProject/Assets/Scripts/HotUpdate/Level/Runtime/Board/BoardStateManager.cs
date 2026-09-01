@@ -16,6 +16,7 @@ namespace Game.Level.Runtime
         public IReadOnlyList<IPiece> AllPieces => mAllPieces;
         public int InitialRescueTargetCount { get; private set; }
         public int RemainingRescueTargetCount { get; private set; }
+        public bool HasRescueTargets => InitialRescueTargetCount > 0;
 
         public BoardStateManager(LevelConfig config)
         {

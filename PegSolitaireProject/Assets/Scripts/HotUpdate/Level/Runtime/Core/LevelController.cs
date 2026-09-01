@@ -89,17 +89,14 @@ namespace Game.Level.Runtime
             return MoveExecutionResult.CreateSuccess(piece, from, to, jumpedPiece);
         }
 
-        /// <summary>存在解救目标时，解救全部目标即胜利；否则沿用只剩一枚棋子的规则。</summary>
         public bool IsVictory()
         {
-            return boardState.InitialRescueTargetCount > 0
-                ? boardState.RemainingRescueTargetCount == 0
-                : boardState.AllPieces.Count == 1;
+            if (boardState.HasRescueTargets)
+                return boardState.RemainingRescueTargetCount == 0;
+
+            return boardState.AllPieces.Count == 1;
         }
 
-        /// <summary>
-        /// 除胜利外，棋盘上不存在任何合法跳跃移动时失败。
-        /// </summary>
         public bool IsDefeat()
         {
             return !IsVictory() && !boardState.HasMovablePieces();
@@ -110,7 +107,7 @@ namespace Game.Level.Runtime
         /// </summary>
         public bool IsGoalCompleted()
         {
-            return goalManager.IsGoalCompleted();
+            return IsVictory();
         }
 
         /// <summary>
@@ -118,7 +115,7 @@ namespace Game.Level.Runtime
         /// </summary>
         public bool IsGoalFailed()
         {
-            return goalManager.IsGoalFailed();
+            return IsDefeat();
         }
 
         /// <summary>
@@ -128,8 +125,8 @@ namespace Game.Level.Runtime
         {
             return new GoalStatus
             {
-                IsCompleted = goalManager.IsGoalCompleted(),
-                IsFailed = goalManager.IsGoalFailed(),
+                IsCompleted = IsVictory(),
+                IsFailed = IsDefeat(),
                 MoveCount = goalManager.MoveCount,
                 CurrentScore = goalManager.CurrentScore,
                 RemainingPieces = boardState.AllPieces.Count,
