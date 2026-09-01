@@ -25,11 +25,6 @@ namespace Game.Level.Runtime
         public int CurrentLevelNumber => currentLevelNumber;
         public LevelController Controller => controller;
 
-        private void Awake()
-        {
-            InitializeComponents();
-        }
-
         private void OnDestroy()
         {
             CleanupLevel();
@@ -131,18 +126,6 @@ namespace Game.Level.Runtime
             controller?.GoalManager.StopTracking();
             currentConfig = null;
             controller = null;
-        }
-
-        private void InitializeComponents()
-        {
-            if (board == null)
-                board = GetComponentInChildren<Board>();
-            if (pieceMoveManager == null)
-                pieceMoveManager = GetComponentInChildren<PieceMoveManager>(true);
-            if (pieceMoveManager == null)
-                pieceMoveManager = gameObject.AddComponent<PieceMoveManager>();
-            if (uiController == null)
-                uiController = GetComponentInChildren<LevelUIController>();
         }
 
         private void InitializeManagers()

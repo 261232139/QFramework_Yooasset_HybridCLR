@@ -237,6 +237,7 @@ GameObject:
   - component: {fileID: 298857527556082430}
   - component: {fileID: 8475207744699435061}
   - component: {fileID: 8192328351744988478}
+  - component: {fileID: 3006043283442033841}
   m_Layer: 5
   m_Name: LevelScene
   m_TagString: Untagged
@@ -259,7 +260,6 @@ RectTransform:
   - {fileID: 6188479401972843590}
   - {fileID: 7761832706806396920}
   - {fileID: 1528684137870671416}
-  - {fileID: 8486668369079545667}
   - {fileID: 3263394959171904909}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -289,11 +289,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: HotUpdate::Game.Level.Runtime.LevelView
   board: {fileID: 3274261823451013014}
+  pieceMoveManager: {fileID: 3006043283442033841}
   uiController: {fileID: 2319580590843633145}
   levelGoal:
     goalType: 1
     targetCount: 1
     targetPieceType: 0
+--- !u!114 &3006043283442033841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7260410188630996401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42c1ecce4f0605049a5576cfe127869f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HotUpdate::Game.Level.Runtime.PieceMoveManager
+  board: {fileID: 3274261823451013014}
+  showDebugInfo: 1
 --- !u!1 &9016570807231974960
 GameObject:
   m_ObjectHideFlags: 0
@@ -461,4 +476,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a0eb7da03db42aa97c8f0c915680eb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-
