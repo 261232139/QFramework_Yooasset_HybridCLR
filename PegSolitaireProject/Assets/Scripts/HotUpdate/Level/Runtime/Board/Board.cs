@@ -250,20 +250,10 @@ namespace Game.Level.Runtime
             if (piece == null || !piece.IsMovable || boardState == null)
                 return;
 
-            var offsets = new[]
+            foreach (var move in piece.GetValidMoves(boardState))
             {
-                new GridPosition(0, -2), new GridPosition(0, 2),
-                new GridPosition(-2, 0), new GridPosition(2, 0)
-            };
-
-            foreach (var offset in offsets)
-            {
-                var target = new GridPosition(piece.Position.x + offset.x, piece.Position.y + offset.y);
-                if (piece.ValidateMove(piece.Position, target, boardState).IsValid &&
-                    gridsByPosition.TryGetValue(target, out var grid))
-                {
+                if (gridsByPosition.TryGetValue(move.Target, out var grid))
                     grid.SetMoveableEffect(true);
-                }
             }
         }
 

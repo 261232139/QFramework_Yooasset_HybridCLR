@@ -31,6 +31,8 @@ namespace Game.Level.Editor
                 MessageType.None);
             boardView.SelectedPieceType = (PieceType)EditorGUILayout.EnumPopup("Type", boardView.SelectedPieceType);
             boardView.NewPieceMovable = EditorGUILayout.Toggle("Movable", boardView.NewPieceMovable);
+            boardView.NewPieceCanBeJumped = EditorGUILayout.Toggle("Can Be Jumped", boardView.NewPieceCanBeJumped);
+            boardView.NewPieceIsRescueTarget = EditorGUILayout.Toggle("Rescue Target", boardView.NewPieceIsRescueTarget);
 
             EditorGUILayout.Space();
             DrawSelectedCellTools();
@@ -120,6 +122,11 @@ namespace Game.Level.Editor
                     (PieceType)EditorGUILayout.EnumPopup("Type", boardView.SelectedPiece.pieceType);
                 boardView.SelectedPiece.isMovable =
                     EditorGUILayout.Toggle("Movable", boardView.SelectedPiece.isMovable);
+                boardView.SelectedPiece.canBeJumped =
+                    EditorGUILayout.Toggle("Can Be Jumped", boardView.SelectedPiece.canBeJumped);
+                boardView.SelectedPiece.isRescueTarget =
+                    EditorGUILayout.Toggle("Rescue Target", boardView.SelectedPiece.isRescueTarget);
+                DrawMoveSkillToggles(boardView.SelectedPiece);
                 if (EditorGUI.EndChangeCheck())
                     editorData.IsDirty = true;
 
@@ -130,6 +137,27 @@ namespace Game.Level.Editor
             }
 
             EditorGUILayout.EndVertical();
+        }
+        private static void DrawMoveSkillToggles(PieceData piece)
+        {
+            if (piece.moveSkills == null)
+                piece.moveSkills = new System.Collections.Generic.List<MoveSkillType>();
+
+            EditorGUILayout.LabelField("Move Skills", EditorStyles.miniBoldLabel);
+            foreach (MoveSkillType skill in System.Enum.GetValues(typeof(MoveSkillType)))
+            {
+                var enabled = piece.moveSkills.Contains(skill);
+                var nextEnabled = EditorGUILayout.Toggle(skill.ToString(), enabled);
+                if (nextEnabled == enabled)
+                    continue;
+
+                if (nextEnabled)
+                    piece.moveSkills.Add(skill);
+                else
+                    piece.moveSkills.Remove(skill);
+            }
+
+            piece.isMovable = piece.moveSkills.Count > 0;
         }
     }
 }

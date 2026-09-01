@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Game.Level.Data
 {
@@ -9,25 +10,26 @@ namespace Game.Level.Data
         Stone = 2,
     }
 
+    /// <summary>V1 原子跳跃能力。棋子的实际移动能力由此列表组合决定。</summary>
+    public enum MoveSkillType
+    {
+        JumpUp,
+        JumpDown,
+        JumpLeft,
+        JumpRight
+    }
+
     [Serializable]
     public struct GridPosition : IEquatable<GridPosition>
     {
         public int x;
         public int y;
-
         public static readonly GridPosition Invalid = new GridPosition(-1, -1);
-
-        public GridPosition(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
+        public GridPosition(int x, int y) { this.x = x; this.y = y; }
         public bool Equals(GridPosition other) => x == other.x && y == other.y;
         public override bool Equals(object obj) => obj is GridPosition other && Equals(other);
         public override int GetHashCode() => (x * 397) ^ y;
         public override string ToString() => $"({x}, {y})";
-        
         public static bool operator ==(GridPosition a, GridPosition b) => a.Equals(b);
         public static bool operator !=(GridPosition a, GridPosition b) => !a.Equals(b);
     }
@@ -37,7 +39,17 @@ namespace Game.Level.Data
     {
         public string id;
         public PieceType pieceType = PieceType.Peg;
+        // 保留以兼容旧关卡配置；新关卡应通过 moveSkills 表达移动能力。
         public bool isMovable;
+        public List<MoveSkillType> moveSkills = new List<MoveSkillType>
+        {
+            MoveSkillType.JumpUp, MoveSkillType.JumpDown,
+            MoveSkillType.JumpLeft, MoveSkillType.JumpRight
+        };
+        public bool canBeJumped = true;
+        public bool isRescueTarget;
         public GridPosition position;
+
+        public bool HasMoveSkills => moveSkills == null ? isMovable : moveSkills.Count > 0;
     }
 }

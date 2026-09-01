@@ -130,7 +130,7 @@ namespace Game.Level.Editor
                 if (!positions.Add(piece.position))
                     messages.Add(new ValidationMessage(ValidationLevel.Error, $"Multiple pieces at {piece.position}"));
 
-                if (piece.isMovable)
+                if (piece.HasMoveSkills)
                     movableCount++;
             }
 

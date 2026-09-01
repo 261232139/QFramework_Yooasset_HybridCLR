@@ -59,7 +59,7 @@ namespace Game.Level.Runtime
             // 初始化移动管理器
             if (moveManager != null)
             {
-                moveManager.Initialize(mBoardState, board);
+                moveManager.Initialize(FindFirstObjectByType<LevelView>()?.Controller, board);
             }
 
             Debug.Log("[Example] Piece move system initialized");

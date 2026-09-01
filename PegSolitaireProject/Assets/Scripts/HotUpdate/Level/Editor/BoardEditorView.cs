@@ -22,6 +22,8 @@ namespace Game.Level.Editor
         public PieceData SelectedPiece { get; private set; }
         public PieceType SelectedPieceType { get; set; } = PieceType.Peg;
         public bool NewPieceMovable { get; set; } = true;
+        public bool NewPieceCanBeJumped { get; set; } = true;
+        public bool NewPieceIsRescueTarget { get; set; }
         public bool HasSelectedCell => SelectedCell.HasValue;
         public bool HasSelectedBoardCell => SelectedCell.HasValue &&
                                             editorData.CurrentConfig.board.HasCell(
@@ -224,6 +226,11 @@ namespace Game.Level.Editor
                 id = CreateUniquePieceId(SelectedPieceType),
                 pieceType = SelectedPieceType,
                 isMovable = NewPieceMovable,
+                moveSkills = NewPieceMovable
+                    ? new System.Collections.Generic.List<MoveSkillType> { MoveSkillType.JumpUp, MoveSkillType.JumpDown, MoveSkillType.JumpLeft, MoveSkillType.JumpRight }
+                    : new System.Collections.Generic.List<MoveSkillType>(),
+                canBeJumped = NewPieceCanBeJumped,
+                isRescueTarget = NewPieceIsRescueTarget,
                 position = position
             };
 

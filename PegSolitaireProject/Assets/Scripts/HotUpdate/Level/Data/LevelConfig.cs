@@ -75,7 +75,7 @@ namespace Game.Level.Data
                     return false;
                 }
 
-                if (piece.isMovable)
+                if (piece.HasMoveSkills)
                     movablePieceCount++;
             }
 

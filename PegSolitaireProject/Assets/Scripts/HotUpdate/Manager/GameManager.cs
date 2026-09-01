@@ -55,6 +55,7 @@ namespace HotUpdate.Game
             InitializeStorageSystem();
             InitializeGameSettings();
             InitializePlayerData();
+            InitializeIap();
         }
 
         private void InitializeConfigSystem()
@@ -79,6 +80,11 @@ namespace HotUpdate.Game
         {
             var playerData = PlayerData;
             Debug.Log($"[GameManager] 玩家数据初始化完成 - 当前关卡: {playerData.CurrentLevelID}");
+        }
+
+        private void InitializeIap()
+        {
+            IAPManager.Instance.InitializePurchasing();
         }
 
         private void ApplyGameSettings(GameSettingsController settings)

@@ -9,6 +9,8 @@
         "AudioKit",
         "Launch",
         "Unity.TextMeshPro",
+        "Unity.Purchasing",
+
         "Game",
         "Luban.Runtime",
         "EasySave3"

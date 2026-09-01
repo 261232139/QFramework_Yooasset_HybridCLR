@@ -89,10 +89,12 @@ namespace Game.Level.Runtime
             return MoveExecutionResult.CreateSuccess(piece, from, to, jumpedPiece);
         }
 
-        /// <summary>棋盘只剩一个棋子时获胜。</summary>
+        /// <summary>存在解救目标时，解救全部目标即胜利；否则沿用只剩一枚棋子的规则。</summary>
         public bool IsVictory()
         {
-            return boardState.AllPieces.Count == 1;
+            return boardState.InitialRescueTargetCount > 0
+                ? boardState.RemainingRescueTargetCount == 0
+                : boardState.AllPieces.Count == 1;
         }
 
         /// <summary>
