@@ -7,7 +7,7 @@ namespace Game.Level.Runtime
     {
         public PieceData Config { get; }
         public GridPosition Position { get; private set; }
-        public bool IsMovable => Config.isMovable;
+        public bool IsMovable => Config.HasMoveSkills;
 
         public RuntimePiece(PieceData config)
         {

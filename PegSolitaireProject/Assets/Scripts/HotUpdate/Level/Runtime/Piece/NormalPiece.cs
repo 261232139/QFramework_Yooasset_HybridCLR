@@ -66,21 +66,7 @@ namespace Game.Level.Runtime
     {
         public static IPiece CreatePiece(PieceData config, GameObject visualObject = null)
         {
-            switch (config.pieceType)
-            {
-                case PieceType.Peg:
-                    return new PegPiece(config, visualObject);
-                
-                case PieceType.Gem:
-                    return new GemPiece(config, visualObject);
-                
-                case PieceType.Stone:
-                    return new StonePiece(config, visualObject);
-                
-                default:
-                    Debug.LogWarning($"Unknown piece type: {config.pieceType}, creating NormalPiece");
-                    return new NormalPiece(config, visualObject);
-            }
+            return new NormalPiece(config, visualObject);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Game.Level.Data;
 using UnityEditor;
 using UnityEngine;
@@ -20,7 +21,7 @@ namespace Game.Level.Editor
 
         public GridPosition? SelectedCell { get; private set; }
         public PieceData SelectedPiece { get; private set; }
-        public PieceType SelectedPieceType { get; set; } = PieceType.Peg;
+        public PieceType SelectedPieceType { get; set; } = PieceType.Normal;
         public bool NewPieceMovable { get; set; } = true;
         public bool NewPieceCanBeJumped { get; set; } = true;
         public bool NewPieceIsRescueTarget { get; set; }
@@ -127,7 +128,7 @@ namespace Game.Level.Editor
                     normal = { textColor = Color.white }
                 };
                 var label = piece.pieceType.ToString()[0].ToString();
-                GUI.Label(pieceRect, piece.isMovable ? $">{label}<" : label, labelStyle);
+                GUI.Label(pieceRect, piece.HasMoveSkills ? $">{label}<" : label, labelStyle);
             }
         }
 
@@ -225,10 +226,7 @@ namespace Game.Level.Editor
             {
                 id = CreateUniquePieceId(SelectedPieceType),
                 pieceType = SelectedPieceType,
-                isMovable = NewPieceMovable,
-                moveSkills = NewPieceMovable
-                    ? new System.Collections.Generic.List<MoveSkillType> { MoveSkillType.JumpUp, MoveSkillType.JumpDown, MoveSkillType.JumpLeft, MoveSkillType.JumpRight }
-                    : new System.Collections.Generic.List<MoveSkillType>(),
+                moveSkills = GetMoveSkillsForType(SelectedPieceType),
                 canBeJumped = NewPieceCanBeJumped,
                 isRescueTarget = NewPieceIsRescueTarget,
                 position = position
@@ -236,6 +234,20 @@ namespace Game.Level.Editor
 
             editorData.CurrentConfig.pieces.Add(piece);
             SelectedPiece = piece;
+        }
+
+        private static List<MoveSkillType> GetMoveSkillsForType(PieceType pieceType)
+        {
+            if (pieceType != PieceType.Normal)
+                return new List<MoveSkillType>();
+
+            return new List<MoveSkillType>
+            {
+                MoveSkillType.JumpUp,
+                MoveSkillType.JumpDown,
+                MoveSkillType.JumpLeft,
+                MoveSkillType.JumpRight
+            };
         }
 
         public void RemovePieceFromSelectedCell()
@@ -276,13 +288,7 @@ namespace Game.Level.Editor
         private Color GetPieceColor(PieceType type, bool isSelected)
         {
             var alpha = isSelected ? 1f : 0.8f;
-            return type switch
-            {
-                PieceType.Peg => new Color(1f, 0.5f, 0f, alpha),
-                PieceType.Gem => new Color(0f, 0.8f, 1f, alpha),
-                PieceType.Stone => new Color(0.6f, 0.6f, 0.6f, alpha),
-                _ => Color.magenta
-            };
+            return new Color(1f, 0.5f, 0f, alpha);
         }
     }
 }

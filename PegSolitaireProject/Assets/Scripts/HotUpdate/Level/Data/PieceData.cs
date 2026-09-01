@@ -5,9 +5,7 @@ namespace Game.Level.Data
 {
     public enum PieceType
     {
-        Peg = 0,
-        Gem = 1,
-        Stone = 2,
+        Normal = 0
     }
 
     /// <summary>V1 原子跳跃能力。棋子的实际移动能力由此列表组合决定。</summary>
@@ -38,9 +36,7 @@ namespace Game.Level.Data
     public class PieceData
     {
         public string id;
-        public PieceType pieceType = PieceType.Peg;
-        // 保留以兼容旧关卡配置；新关卡应通过 moveSkills 表达移动能力。
-        public bool isMovable;
+        public PieceType pieceType = PieceType.Normal;
         public List<MoveSkillType> moveSkills = new List<MoveSkillType>
         {
             MoveSkillType.JumpUp, MoveSkillType.JumpDown,
@@ -50,6 +46,6 @@ namespace Game.Level.Data
         public bool isRescueTarget;
         public GridPosition position;
 
-        public bool HasMoveSkills => moveSkills == null ? isMovable : moveSkills.Count > 0;
+        public bool HasMoveSkills => moveSkills != null && moveSkills.Count > 0;
     }
 }

@@ -74,11 +74,7 @@ namespace Game.Level.Runtime
         {
             var skillTypes = config.moveSkills;
             if (skillTypes == null)
-            {
-                skillTypes = config.isMovable
-                    ? new List<MoveSkillType> { MoveSkillType.JumpUp, MoveSkillType.JumpDown, MoveSkillType.JumpLeft, MoveSkillType.JumpRight }
-                    : new List<MoveSkillType>();
-            }
+                return new List<IMoveSkill>();
 
             var skills = new List<IMoveSkill>(skillTypes.Count);
             foreach (var skillType in skillTypes)

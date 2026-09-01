@@ -83,7 +83,9 @@ namespace Game.Level.Editor
                 {
                     id = $"{pieceType.ToString().ToLower()}_{i:D3}",
                     pieceType = pieceType,
-                    isMovable = i < movableCount,
+                    moveSkills = i < movableCount
+                        ? new List<MoveSkillType> { MoveSkillType.JumpUp, MoveSkillType.JumpDown, MoveSkillType.JumpLeft, MoveSkillType.JumpRight }
+                        : new List<MoveSkillType>(),
                     position = position.Value
                 });
                 usedPositions.Add(position.Value);
@@ -128,7 +130,7 @@ namespace Game.Level.Editor
                     return entry.Key;
             }
 
-            return PieceType.Peg;
+            return PieceType.Normal;
         }
     }
 }

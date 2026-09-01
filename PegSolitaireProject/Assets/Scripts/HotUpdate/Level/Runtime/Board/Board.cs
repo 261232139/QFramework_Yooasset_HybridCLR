@@ -143,17 +143,7 @@ namespace Game.Level.Runtime
         /// <summary>根据棋子类型获取预制体</summary>
         private NormalPieceView GetPiecePrefab(PieceType type)
         {
-            switch (type)
-            {
-                case PieceType.Peg:
-                    return pegPiecePrefab;
-                case PieceType.Gem:
-                    return gemPiecePrefab;
-                case PieceType.Stone:
-                    return stonePiecePrefab;
-                default:
-                    return pegPiecePrefab;
-            }
+            return pegPiecePrefab;
         }
 
         /// <summary>

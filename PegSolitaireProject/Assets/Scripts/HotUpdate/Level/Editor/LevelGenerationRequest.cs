@@ -12,9 +12,7 @@ namespace Game.Level.Editor
         public float movablePieceRatio = 0.3f;
         public Dictionary<PieceType, int> pieceTypeDistribution = new Dictionary<PieceType, int>
         {
-            { PieceType.Peg, 5 },
-            { PieceType.Gem, 3 },
-            { PieceType.Stone, 2 }
+            { PieceType.Normal, 1 }
         };
     }
 

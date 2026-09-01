@@ -184,7 +184,9 @@ namespace Game.Level.Editor
                 {
                     id = sourcePiece.id,
                     pieceType = sourcePiece.pieceType,
-                    isMovable = sourcePiece.isMovable,
+                    moveSkills = sourcePiece.moveSkills == null ? null : new List<MoveSkillType>(sourcePiece.moveSkills),
+                    canBeJumped = sourcePiece.canBeJumped,
+                    isRescueTarget = sourcePiece.isRescueTarget,
                     position = sourcePiece.position
                 });
             }

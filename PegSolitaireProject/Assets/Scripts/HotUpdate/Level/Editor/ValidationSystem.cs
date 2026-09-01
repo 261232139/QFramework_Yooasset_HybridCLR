@@ -147,27 +147,11 @@ namespace Game.Level.Editor
 
         private static void ValidateGameplay(LevelConfig config, List<ValidationMessage> messages)
         {
-            var pegCount = 0;
-            var gemCount = 0;
-            var stoneCount = 0;
-
             foreach (var piece in config.pieces)
             {
-                if (piece == null) continue;
-
-                switch (piece.pieceType)
-                {
-                    case PieceType.Peg: pegCount++; break;
-                    case PieceType.Gem: gemCount++; break;
-                    case PieceType.Stone: stoneCount++; break;
-                }
+                if (piece != null && piece.pieceType != PieceType.Normal)
+                    messages.Add(new ValidationMessage(ValidationLevel.Error, $"Unsupported piece type on {piece.id}: {piece.pieceType}"));
             }
-
-            if (gemCount == 0)
-                messages.Add(new ValidationMessage(ValidationLevel.Warning, "No gems defined (may affect gameplay goals)"));
-
-            if (stoneCount > pegCount + gemCount)
-                messages.Add(new ValidationMessage(ValidationLevel.Info, "Many stones relative to other pieces"));
         }
 
         public static bool HasErrors(List<ValidationMessage> messages)

@@ -30,7 +30,7 @@ namespace Game.Level.Runtime
     {
         public LevelGoalType goalType = LevelGoalType.RemainOne;
         public int targetCount = 1;
-        public PieceType targetPieceType = PieceType.Peg;
+        public PieceType targetPieceType = PieceType.Normal;
     }
 
     /// <summary>
@@ -180,14 +180,7 @@ namespace Game.Level.Runtime
 
         private int CalculateScore(IPiece piece)
         {
-            // 根据棋子类型计算分数
-            return piece.PieceType switch
-            {
-                PieceType.Peg => 10,
-                PieceType.Gem => 50,
-                PieceType.Stone => 5,
-                _ => 10
-            };
+            return 10;
         }
 
         private void AddScore(int score)

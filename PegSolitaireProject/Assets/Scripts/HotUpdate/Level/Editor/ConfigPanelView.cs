@@ -142,7 +142,7 @@ namespace Game.Level.Editor
             var count = 0;
             foreach (var piece in editorData.CurrentConfig.pieces)
             {
-                if (piece.isMovable)
+                if (piece.HasMoveSkills)
                     count++;
             }
             return count;

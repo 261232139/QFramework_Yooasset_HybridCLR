@@ -30,7 +30,6 @@ namespace Game.Level.Editor
                 "Grid colors: gray = editor-only empty position; green = board cell; orange/blue = selected position.",
                 MessageType.None);
             boardView.SelectedPieceType = (PieceType)EditorGUILayout.EnumPopup("Type", boardView.SelectedPieceType);
-            boardView.NewPieceMovable = EditorGUILayout.Toggle("Movable", boardView.NewPieceMovable);
             boardView.NewPieceCanBeJumped = EditorGUILayout.Toggle("Can Be Jumped", boardView.NewPieceCanBeJumped);
             boardView.NewPieceIsRescueTarget = EditorGUILayout.Toggle("Rescue Target", boardView.NewPieceIsRescueTarget);
 
@@ -120,8 +119,6 @@ namespace Game.Level.Editor
                 EditorGUI.BeginChangeCheck();
                 boardView.SelectedPiece.pieceType =
                     (PieceType)EditorGUILayout.EnumPopup("Type", boardView.SelectedPiece.pieceType);
-                boardView.SelectedPiece.isMovable =
-                    EditorGUILayout.Toggle("Movable", boardView.SelectedPiece.isMovable);
                 boardView.SelectedPiece.canBeJumped =
                     EditorGUILayout.Toggle("Can Be Jumped", boardView.SelectedPiece.canBeJumped);
                 boardView.SelectedPiece.isRescueTarget =
@@ -157,7 +154,6 @@ namespace Game.Level.Editor
                     piece.moveSkills.Remove(skill);
             }
 
-            piece.isMovable = piece.moveSkills.Count > 0;
         }
     }
 }

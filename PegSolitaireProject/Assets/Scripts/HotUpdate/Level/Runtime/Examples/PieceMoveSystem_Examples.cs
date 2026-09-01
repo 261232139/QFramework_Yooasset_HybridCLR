@@ -260,11 +260,15 @@ namespace Game.Level.Runtime
             // 创建简单的测试布局
             config.pieces = new List<PieceData>
             {
-                new PieceData { id = "p1", position = new GridPosition(2, 2), isMovable = true, pieceType = PieceType.Peg },
-                new PieceData { id = "p2", position = new GridPosition(2, 1), isMovable = false, pieceType = PieceType.Stone },
-                new PieceData { id = "p3", position = new GridPosition(1, 2), isMovable = false, pieceType = PieceType.Stone },
-                new PieceData { id = "p4", position = new GridPosition(3, 2), isMovable = false, pieceType = PieceType.Stone },
-                new PieceData { id = "p5", position = new GridPosition(2, 3), isMovable = false, pieceType = PieceType.Stone },
+                new PieceData { id = "p1", position = new GridPosition(2, 2), pieceType = PieceType.Normal, moveSkills = new List<MoveSkillType>
+                {
+                    MoveSkillType.JumpUp, MoveSkillType.JumpDown,
+                    MoveSkillType.JumpLeft, MoveSkillType.JumpRight
+                } },
+                new PieceData { id = "p2", position = new GridPosition(2, 1), pieceType = PieceType.Normal, moveSkills = new List<MoveSkillType>() },
+                new PieceData { id = "p3", position = new GridPosition(1, 2), pieceType = PieceType.Normal, moveSkills = new List<MoveSkillType>() },
+                new PieceData { id = "p4", position = new GridPosition(3, 2), pieceType = PieceType.Normal, moveSkills = new List<MoveSkillType>() },
+                new PieceData { id = "p5", position = new GridPosition(2, 3), pieceType = PieceType.Normal, moveSkills = new List<MoveSkillType>() },
             };
 
             return config;
