@@ -7,7 +7,6 @@ namespace Game.Level.Runtime
     {
         [SerializeField] private Board board;
         [SerializeField] private PieceMoveManager pieceMoveManager;
-        [SerializeField] private LevelInputHandler inputHandler;
         [SerializeField] private LevelUIController uiController;
         [SerializeField] private LevelGoal levelGoal = new LevelGoal();
 
@@ -142,8 +141,6 @@ namespace Game.Level.Runtime
                 pieceMoveManager = GetComponentInChildren<PieceMoveManager>(true);
             if (pieceMoveManager == null)
                 pieceMoveManager = gameObject.AddComponent<PieceMoveManager>();
-            if (inputHandler == null)
-                inputHandler = GetComponentInChildren<LevelInputHandler>(true);
             if (uiController == null)
                 uiController = GetComponentInChildren<LevelUIController>();
         }
@@ -160,8 +157,6 @@ namespace Game.Level.Runtime
                 pieceMoveManager.OnPieceDeselected += HandlePieceDeselected;
                 pieceMoveManager.OnMoveExecuted += HandleMoveExecuted;
             }
-
-            inputHandler?.EnableInput(false);
 
             controller.GoalManager.OnGoalCompleted += HandleGoalCompleted;
             controller.GoalManager.OnGoalFailed += HandleGoalFailed;
@@ -210,8 +205,8 @@ namespace Game.Level.Runtime
         }
 
         public Board GetBoard() => board;
-        public LevelInputHandler GetInputHandler() => inputHandler;
         public LevelGoalManager GetGoalManager() => controller?.GoalManager;
         public LevelUIController GetUIController() => uiController;
     }
 }
+

@@ -1,5 +1,9 @@
 # 关卡系统架构文档 v3.0 - LevelView 架构
 
+> **已过时快照。** 现行架构见 [ARCHITECTURE_V4.md](./ARCHITECTURE_V4.md)。  
+> v3.0 记录的是 LevelView 初版：输入仍按 `LevelInputHandler`、胜利仍按 `LevelGoalType`、棋子类型仍按 Peg/Gem/Stone。这些与当前代码不符，仅作演进对照。
+
+
 ## 一、架构概览
 
 ### 设计原则

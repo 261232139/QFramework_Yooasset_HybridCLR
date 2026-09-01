@@ -4,12 +4,13 @@ using UnityEngine;
 
 namespace Game.Level.Runtime
 {
-    /// <summary>维护关卡内棋子的运行时位置与解救目标计数。</summary>
+    /// <summary>缁存姢鍏冲崱鍐呮瀛愮殑杩愯鏃朵綅缃笌瑙ｆ晳鐩爣璁℃暟銆?/summary>
     public class BoardStateManager : IBoardState
     {
         private readonly LevelConfig mConfig;
         private readonly Dictionary<GridPosition, IPiece> mPiecesByPosition;
         private readonly List<IPiece> mAllPieces;
+        private readonly List<IPiece> mInitialPieces;
 
         public int Width => mConfig.board.width;
         public int Height => mConfig.board.height;
@@ -23,6 +24,7 @@ namespace Game.Level.Runtime
             mConfig = config;
             mPiecesByPosition = new Dictionary<GridPosition, IPiece>();
             mAllPieces = new List<IPiece>();
+            mInitialPieces = new List<IPiece>();
             InitializePieces();
         }
 
@@ -32,6 +34,7 @@ namespace Game.Level.Runtime
             {
                 var piece = PieceFactory.CreatePiece(pieceData);
                 mAllPieces.Add(piece);
+                mInitialPieces.Add(piece);
                 mPiecesByPosition[piece.Position] = piece;
                 if (piece.IsRescueTarget)
                 {
@@ -80,9 +83,11 @@ namespace Game.Level.Runtime
         public void ResetAllPieces()
         {
             mPiecesByPosition.Clear();
-            foreach (var piece in mAllPieces)
+            mAllPieces.Clear();
+            foreach (var piece in mInitialPieces)
             {
                 piece.Reset();
+                mAllPieces.Add(piece);
                 mPiecesByPosition[piece.Position] = piece;
             }
 
@@ -116,3 +121,6 @@ namespace Game.Level.Runtime
         }
     }
 }
+
+
+

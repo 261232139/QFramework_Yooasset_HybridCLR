@@ -1,145 +1,173 @@
-{
-    "schemaVersion": 1,
-    "levelId": "level_001",
-    "sceneType": 0,
-    "difficulty": 1,
-    "board": {
-        "width": 5,
-        "height": 5,
-        "rows": [
-            {
-                "cells": [
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": false
-                    },
-                    {
-                        "isActive": false
-                    }
-                ]
-            },
-            {
-                "cells": [
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    }
-                ]
-            },
-            {
-                "cells": [
-                    {
-                        "isActive": false
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    }
-                ]
-            },
-            {
-                "cells": [
-                    {
-                        "isActive": false
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    }
-                ]
-            },
-            {
-                "cells": [
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    },
-                    {
-                        "isActive": true
-                    }
-                ]
-            }
-        ]
-    },
-    "pieces": [
-        {
-            "id": "peg_002",
-            "pieceType": 0,
-            "isMovable": true,
-            "position": {
-                "x": 2,
-                "y": 2
-            }
-        },
-        {
-            "id": "peg_004",
-            "pieceType": 0,
-            "isMovable": true,
-            "position": {
-                "x": 2,
-                "y": 3
-            }
-        },
-        {
-            "id": "gem_008",
-            "pieceType": 1,
-            "isMovable": true,
-            "position": {
-                "x": 4,
-                "y": 4
-            }
-        },
-        {
-            "id": "gem_010",
-            "pieceType": 1,
-            "isMovable": true,
-            "position": {
-                "x": 1,
-                "y": 4
-            }
-        }
-    ]
+﻿{
+    "schemaVersion":  1,
+    "levelId":  "level_001",
+    "sceneType":  0,
+    "difficulty":  1,
+    "board":  {
+                  "width":  5,
+                  "height":  5,
+                  "rows":  [
+                               {
+                                   "cells":  [
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  false
+                                                 },
+                                                 {
+                                                     "isActive":  false
+                                                 }
+                                             ]
+                               },
+                               {
+                                   "cells":  [
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 }
+                                             ]
+                               },
+                               {
+                                   "cells":  [
+                                                 {
+                                                     "isActive":  false
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 }
+                                             ]
+                               },
+                               {
+                                   "cells":  [
+                                                 {
+                                                     "isActive":  false
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 }
+                                             ]
+                               },
+                               {
+                                   "cells":  [
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 },
+                                                 {
+                                                     "isActive":  true
+                                                 }
+                                             ]
+                               }
+                           ]
+              },
+    "pieces":  [
+                   {
+                       "id":  "peg_002",
+                       "pieceType":  0,
+                       "position":  {
+                                        "x":  2,
+                                        "y":  2
+                                    },
+                       "moveSkills":  [
+                                          0,
+                                          1,
+                                          2,
+                                          3
+                                      ],
+                       "canBeJumped":  true,
+                       "isRescueTarget":  false
+                   },
+                   {
+                       "id":  "peg_004",
+                       "pieceType":  0,
+                       "position":  {
+                                        "x":  2,
+                                        "y":  3
+                                    },
+                       "moveSkills":  [
+                                          0,
+                                          1,
+                                          2,
+                                          3
+                                      ],
+                       "canBeJumped":  true,
+                       "isRescueTarget":  false
+                   },
+                   {
+                       "id":  "gem_008",
+                       "pieceType":  0,
+                       "position":  {
+                                        "x":  4,
+                                        "y":  4
+                                    },
+                       "moveSkills":  [
+                                          0,
+                                          1,
+                                          2,
+                                          3
+                                      ],
+                       "canBeJumped":  true,
+                       "isRescueTarget":  false
+                   },
+                   {
+                       "id":  "gem_010",
+                       "pieceType":  0,
+                       "position":  {
+                                        "x":  1,
+                                        "y":  4
+                                    },
+                       "moveSkills":  [
+                                          0,
+                                          1,
+                                          2,
+                                          3
+                                      ],
+                       "canBeJumped":  true,
+                       "isRescueTarget":  false
+                   }
+               ]
 }
