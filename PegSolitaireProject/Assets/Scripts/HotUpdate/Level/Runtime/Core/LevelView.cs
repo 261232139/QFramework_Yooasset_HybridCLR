@@ -130,16 +130,13 @@ namespace Game.Level.Runtime
 
         private void InitializeManagers()
         {
-            if (pieceMoveManager != null)
-            {
-                pieceMoveManager.Initialize(controller, board);
-                pieceMoveManager.OnPieceSelected -= HandlePieceSelected;
-                pieceMoveManager.OnPieceDeselected -= HandlePieceDeselected;
-                pieceMoveManager.OnMoveExecuted -= HandleMoveExecuted;
-                pieceMoveManager.OnPieceSelected += HandlePieceSelected;
-                pieceMoveManager.OnPieceDeselected += HandlePieceDeselected;
-                pieceMoveManager.OnMoveExecuted += HandleMoveExecuted;
-            }
+            pieceMoveManager.Initialize(controller, board);
+            pieceMoveManager.OnPieceSelected -= HandlePieceSelected;
+            pieceMoveManager.OnPieceDeselected -= HandlePieceDeselected;
+            pieceMoveManager.OnMoveExecuted -= HandleMoveExecuted;
+            pieceMoveManager.OnPieceSelected += HandlePieceSelected;
+            pieceMoveManager.OnPieceDeselected += HandlePieceDeselected;
+            pieceMoveManager.OnMoveExecuted += HandleMoveExecuted;
 
             controller.GoalManager.OnGoalCompleted += HandleGoalCompleted;
             controller.GoalManager.OnGoalFailed += HandleGoalFailed;
