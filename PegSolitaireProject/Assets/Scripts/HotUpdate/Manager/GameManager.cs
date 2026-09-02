@@ -24,6 +24,8 @@ namespace HotUpdate.Game
 
         public GameSettingsController GameSettings => GameSettingsController.Instance;
 
+        public OneOffEventCtrl OneOffEvents => OneOffEventCtrl.Instance;
+
         public SaveManager SaveManager => SaveManager.Instance;
 
         private GameManager() { }
@@ -55,6 +57,7 @@ namespace HotUpdate.Game
             InitializeStorageSystem();
             InitializeGameSettings();
             InitializePlayerData();
+            InitializeOneOffEvents();
             InitializeIap();
         }
 
@@ -85,6 +88,12 @@ namespace HotUpdate.Game
         private void InitializeIap()
         {
             IAPManager.Instance.InitializePurchasing();
+        }
+
+        private void InitializeOneOffEvents()
+        {
+            var oneOffEvents = OneOffEvents;
+            Debug.Log("[GameManager] 一次性事件系统初始化完成");
         }
 
         private void ApplyGameSettings(GameSettingsController settings)

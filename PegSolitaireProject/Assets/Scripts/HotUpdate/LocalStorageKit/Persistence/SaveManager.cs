@@ -83,6 +83,11 @@ namespace HotUpdate.LocalStorageKit
 
         internal void OnUpdate(float deltaTime)
         {
+            foreach (var controller in mAllControllers)
+            {
+                controller?.OnUpdate();
+            }
+
             ProcessImmediateSave();
             ProcessDelayedSave(deltaTime);
         }

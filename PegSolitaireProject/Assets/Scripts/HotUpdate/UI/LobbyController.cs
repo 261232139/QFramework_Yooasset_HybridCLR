@@ -16,6 +16,7 @@ namespace HotUpdate.UI
         public int CurrentLevel => PlayerDataController.Instance.CurrentLevelID;
 
         private bool mIsLoadingLevel;
+        private bool mStaminaConsumedForCurrentLevel;
         private MonoBehaviour mCoroutineHost;
         private LevelStateMachine mLevelStateMachine;
 
@@ -77,12 +78,19 @@ namespace HotUpdate.UI
 
         public void CompleteLevel()
         {
+            if (mStaminaConsumedForCurrentLevel)
+            {
+                PlayerDataController.Instance.RefundStaminaForLevel();
+                mStaminaConsumedForCurrentLevel = false;
+            }
+
             PlayerDataController.Instance.UnlockNextLevel();
             Debug.Log($"[LobbyController] Level completed! Next level: {CurrentLevel}");
         }
 
         public void FailLevel()
         {
+            mStaminaConsumedForCurrentLevel = false;
             Debug.Log($"[LobbyController] Level {CurrentLevel} failed");
         }
 
@@ -101,6 +109,16 @@ namespace HotUpdate.UI
                 ReturnToLobby();
                 yield break;
             }
+
+            if (!PlayerDataController.Instance.TryConsumeStaminaForLevel())
+            {
+                Debug.LogWarning("[LobbyController] Not enough stamina to enter level.");
+                mIsLoadingLevel = false;
+                ReturnToLobby();
+                yield break;
+            }
+
+            mStaminaConsumedForCurrentLevel = !PlayerDataController.Instance.HasUnlimitedStamina;
 
             mLevelStateMachine = Object.FindFirstObjectByType<LevelStateMachine>();
             if (mLevelStateMachine == null)

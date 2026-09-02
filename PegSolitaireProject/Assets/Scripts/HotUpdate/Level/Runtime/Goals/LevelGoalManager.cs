@@ -15,11 +15,9 @@ namespace Game.Level.Runtime
     /// </summary>
     public enum LevelGoalType
     {
-        ClearAll,           // 清除所有棋子
-        RemainOne,          // 只剩一个棋子
-        ClearSpecific,      // 清除特定类型的棋子
-        MoveCount,          // 限制移动次数
-        ScoreTarget         // 达到目标分数
+        RemainOne = 1,      // 只剩一个棋子
+        ClearSpecific = 2,  // 清除特定类型的棋子
+        MoveCount = 3,      // 限制移动次数
     }
 
     /// <summary>
@@ -122,9 +120,6 @@ namespace Game.Level.Runtime
 
             switch (currentGoal.goalType)
             {
-                case LevelGoalType.ClearAll:
-                    return remainingPieces == 0;
-
                 case LevelGoalType.RemainOne:
                     return remainingPieces == 1;
 
@@ -132,11 +127,7 @@ namespace Game.Level.Runtime
                     return CountPiecesByType(currentGoal.targetPieceType) == 0;
 
                 case LevelGoalType.MoveCount:
-                    // 移动次数限制，需要在限制内完成其他目标
                     return remainingPieces <= currentGoal.targetCount && moveCount <= currentGoal.targetCount;
-
-                case LevelGoalType.ScoreTarget:
-                    return currentScore >= currentGoal.targetCount;
 
                 default:
                     return false;
@@ -154,7 +145,6 @@ namespace Game.Level.Runtime
             switch (currentGoal.goalType)
             {
                 case LevelGoalType.MoveCount:
-                    // 超过移动次数限制
                     return moveCount > currentGoal.targetCount;
 
                 default:
@@ -214,11 +204,9 @@ namespace Game.Level.Runtime
         {
             return currentGoal.goalType switch
             {
-                LevelGoalType.ClearAll => "清除所有棋子",
                 LevelGoalType.RemainOne => "只剩下一个棋子",
                 LevelGoalType.ClearSpecific => $"清除所有{currentGoal.targetPieceType}",
                 LevelGoalType.MoveCount => $"在{currentGoal.targetCount}步内完成",
-                LevelGoalType.ScoreTarget => $"达到{currentGoal.targetCount}分",
                 _ => "未知目标"
             };
         }

@@ -56,5 +56,9 @@ namespace HotUpdate.LocalStorageKit
         public abstract void Save();
         
         public abstract void Load();
+
+        public virtual void OnUpdate()
+        {
+        }
     }
 }

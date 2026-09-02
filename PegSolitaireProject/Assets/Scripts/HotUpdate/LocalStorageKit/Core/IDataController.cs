@@ -13,5 +13,6 @@ namespace HotUpdate.LocalStorageKit
         void Save();
         void Load();
         void ClearDirty();
+        void OnUpdate();
     }
 }
